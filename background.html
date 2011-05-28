@@ -1,0 +1,133 @@
+<script>
+    var pollIntervalMin = 1000 * 60; 
+    var pollIntervalMax = 1000 * 60 * 10;  
+    var requestFailureCount = 0;  // used for exponential backoff
+    var requestTimeout = 1000 * 5;  // 5 seconds
+    var options = {};
+    
+    function updateOptions(lang){
+        try {
+            options = JSON.parse(localStorage.options);
+        }catch(e){
+        }
+        var defaults = {
+            deepbit_token: '',   
+            deepbit_workers: 1,
+            deepbit_hashrate: 200            
+        };
+        for(var key in defaults){
+            if(options[key] == undefined){
+                options[key] = defaults[key];
+            }
+        }        
+    }    
+    
+    function scheduleRequest() {
+        var randomness = Math.random() * 2;
+        var exponent = Math.pow(2, requestFailureCount);
+        var delay = Math.min(randomness * pollIntervalMin * exponent, 
+        pollIntervalMax);
+        delay = Math.round(delay);
+
+        window.setTimeout(startRequest, delay);
+    }
+
+    function startRequest() {
+        getData(
+        function(count) {            
+            scheduleRequest();
+        },
+        function() {            
+            scheduleRequest();
+        }
+    );
+    }
+    
+    function getData(onSuccess, onError) {
+        if(options.deepbit_token == ''){
+            handleError();
+            return;
+        }
+        
+        var xhr = new XMLHttpRequest(); 
+        var abortTimerId = window.setTimeout(function() {
+            xhr.abort();  // synchronously calls onreadystatechange
+        }, requestTimeout);
+        
+        function handleError() {
+            ++requestFailureCount;
+            window.clearTimeout(abortTimerId);
+            chrome.browserAction.setBadgeText({
+                text: '!'
+            });
+            
+            chrome.browserAction.setBadgeBackgroundColor({
+                color: [255, 0, 0, 255]
+            });
+            if (onError){                 
+                onError();       
+            }      
+        }
+        
+        function handleSuccess(data) {
+            requestFailureCount = 0;
+            chrome.browserAction.setBadgeText({
+                text: ''
+            });
+            
+            window.clearTimeout(abortTimerId);
+            if (onSuccess){
+                onSuccess(data);
+            }
+               
+        }
+        
+        try {
+            xhr.onreadystatechange = function(){
+                console.log(xhr);
+                if (xhr.readyState != 4){
+                    return;
+                }
+                if(xhr.status != 200){
+                    handleError();
+                    return;
+                }
+                
+                var data = JSON.parse(xhr.responseText);    
+                
+                data.workers_alive = 0;
+                data.workers_all = 0;
+                for (var i in data.workers) {
+                    if (data.workers.hasOwnProperty(i)) {
+                        data.workers_all++;
+                        if(data.workers[i].alive){
+                            data.workers_alive ++;
+                        }
+                    }
+                }
+                data.workers_formatted = data.workers_alive + '/' + data.workers_all;
+                handleSuccess(data);
+                
+                //                var reward = data.confirmed_reward.toString().slice(0, 4).replace(/\.$/, '');;
+                //                var hashrate = data.hashrate.toString().slice(0, 4).replace(/\.$/, '');
+            }
+
+            xhr.onerror = function(error) {
+                handleError();
+            }
+            
+            xhr.open("GET", "http://deepbit.net/api/" + options.deepbit_token, true);
+            xhr.send(null);
+        } catch(e) {
+            handleError();
+        }
+    }
+    
+    chrome.browserAction.onClicked.addListener(function(tab) {
+        startRequest();
+    });
+    
+    updateOptions();
+    startRequest();
+
+</script>

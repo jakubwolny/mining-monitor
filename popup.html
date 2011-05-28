@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+        <title>Bitcoin Mining Monitor</title>
+        <script>
+            window.onload = function(){
+                chrome.extension.getBackgroundPage().getData(function(data){
+                    ['confirmed_reward', 'hashrate', 'workers_formatted'].forEach(function(el){
+                        document.getElementById(el).textContent = data[el];
+                    });                    
+                }, function(){
+                    document.getElementById('error').textContent = 'Invalid token';
+                });                
+            }
+        </script>
+        <style>
+            h4 {
+                color: #f00;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <h3>deepbit.net</h3>
+            <h4 id="error"></h4>
+            <table>
+                <tr><td>Reward</td><td id="confirmed_reward"></td></tr>
+                <tr><td>Hashrate</td><td id="hashrate"></td></tr>
+                <tr><td>Workers</td><td id="workers_formatted"></td></tr>
+                <tr><td></td><td></td></tr>
+            </table>
+
+        </div>
+    </body>
+</html>

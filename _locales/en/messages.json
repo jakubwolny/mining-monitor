@@ -1,0 +1,20 @@
+{
+    "extension_description": {
+        "message": "Watch your Deepbit statistics in the Chrome"
+    },
+    "extension_action" : {
+        "message": "Check now"
+    },
+    "options_title": {
+        "message": "Bitcoin Mining Monitor Options"
+    }, 
+    "save": {
+        "message": "Save"
+    },
+    "saved": {
+        "message": "Saved"
+    },    
+    "restore_defaults": {
+        "message": "Restore defaults"
+    }
+}
