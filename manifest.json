@@ -5,7 +5,8 @@
     "description": "__MSG_extension_description__",
     "icons": { 
         "16": "img/16.png",
-        "48": "img/48.png"        
+        "48": "img/48.png",
+		"128": "img/128.png",
     },
     "default_locale": "en",  
     "browser_action": {
