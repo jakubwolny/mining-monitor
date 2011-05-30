@@ -6,7 +6,7 @@
         <script>
             window.onload = function(){
                 chrome.extension.getBackgroundPage().getData(function(data){
-                    ['confirmed_reward', 'hashrate', 'workers_formatted'].forEach(function(el){
+                    ['confirmed_reward', 'hashrate', 'workers_formatted', 'payout_history'].forEach(function(el){
                         document.getElementById(el).textContent = data[el];
                     });                    
                 }, function(){
@@ -28,7 +28,7 @@
                 <tr><td>Reward</td><td id="confirmed_reward"></td></tr>
                 <tr><td>Hashrate</td><td id="hashrate"></td></tr>
                 <tr><td>Workers</td><td id="workers_formatted"></td></tr>
-                <tr><td></td><td></td></tr>
+                <tr><td>Payout</td><td id="payout_history"></td></tr>
             </table>
 
         </div>
