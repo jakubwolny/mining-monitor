@@ -18,15 +18,42 @@
         "message": "Restore defaults"
     },
     "confirmed_reward": {
-        "message": ""
+        "message": "Reward:"
     },
     "hashrate": {
-        "message": ""
+        "message": "Hashrate:"
     },
     "workers_formatted": {
-        "message": ""
+        "message": "Workers:"
     },
     "payout_history": {
-        "message": ""
+        "message": "Payout:"
+    },
+    "estimated_reward": {
+        "message": "Estimated:"
+    },
+    "send_threshold": {
+        "message": "Threshold:"
+    },
+    "unconfirmed_reward": {
+        "message": "Unconfirmed:"
+    },
+    "username": {
+        "message": "Username:"
+    },
+    "wallet": {
+        "message": "Wallet:"
+    },
+    "confirmed_rewards": {
+        "message": "Reward:"
+    },
+    "unconfirmed_rewards": {
+        "message": "Unconfirmed:"
+    },
+    "estimated_rewards": {
+        "message": "Estimated:"
+    },
+    "payouts": {
+        "message": "Payout:"
     }
 }

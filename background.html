@@ -8,8 +8,9 @@
     
     var pools = {
         deepbit: {
+            title: 'deepbit.net',
             url: "https://deepbit.net/api/",
-            token: "4ddd2228816197c24f000008_F71182E6D0",
+            fields: ["confirmed_reward", "hashrate", "workers_formatted", "payout_history"],
             hydrate: function(data){
                 data.workers_alive = 0;
                 data.workers_all = 0;
@@ -26,17 +27,29 @@
             }
         },
         slush: {
+            title: 'mining.bitcoin.cz',
             url: "http://mining.bitcoin.cz/accounts/profile/json/",
-            token: "12382-c6e66196e85bfaa6a0b479cff025b26e",
+            fields: ["confirmed_reward", "estimated_reward", "send_threshold", "unconfirmed_reward", "username", "wallet"],
             hydrate: function(data){                
                 return data;
             }
         },
         btcguild: {
+            title: 'btcguild.com',
             url: "http://btcguild.com/api.php?api_key=",
-            token: "20dcc28f31da99897163ea583c52ede9",
-            hydrate: function(data){                
-                return data;
+            fields: ["hashrate", "confirmed_rewards", "unconfirmed_rewards", "estimated_rewards", "payouts"],
+            hydrate: function(data){             
+                var result = data.user;
+                var hashrate = 0;
+                result.workers_all = 0;
+                for (var i in data.workers) {
+                    if (data.workers.hasOwnProperty(i)) {
+                        result.workers_all++;
+                        hashrate += data.workers[i].hash_rate;
+                    }
+                }                
+                result.hashrate = result.workers_all > 0 ? hashrate / result.workers_all : 0;
+                return result;
             }
         }
     }
@@ -47,9 +60,15 @@
         }catch(e){
         }
         var defaults = {
-            deepbit_token: '',   
-            deepbit_workers: 1,
-            deepbit_hashrate: 200            
+            deepbit: {
+                token: ''
+            },
+            slush: {
+                token: ''
+            },
+            btcguild: {
+                token: ''
+            }
         };
         for(var key in defaults){
             if(options[key] == undefined){
@@ -69,10 +88,11 @@
     }
 
     function startRequest() {
-        ['deepbit', 'slush'].forEach(function(e){
-            getData(e);
-        });
-        
+        for(var pool in pools){
+            if(options[pool].token){
+                getData(pool);
+            }
+        }
         
         //        getData(
         //        function(count) {            
@@ -85,11 +105,6 @@
     }
     
     function getData(pool, onSuccess, onError) {
-        //        if(options.deepbit_token == ''){
-        //            handleError();
-        //            return;
-        //        }
-        
         var xhr = new XMLHttpRequest(); 
         var abortTimerId = window.setTimeout(function() {
             xhr.abort();  // synchronously calls onreadystatechange
@@ -118,11 +133,10 @@
             
             window.clearTimeout(abortTimerId);
             data[pool] = pools[pool].hydrate(result);
-            console.log(data);
+            
             if (onSuccess){
                 //                onSuccess(data);
-            }
-               
+            }               
         }
         
         try {
@@ -131,23 +145,25 @@
                 if (xhr.readyState != 4){
                     return;
                 }
-//                if(xhr.status != 200){
-//                    handleError();
-//                    return;
-//                }
-                
-                handleSuccess(pool, JSON.parse(xhr.responseText));
+                //                if(xhr.status != 200){
+                //                    handleError();
+                //                    return;
+                //                }
+                if(xhr.responseText != ''){
+                    handleSuccess(pool, JSON.parse(xhr.responseText));    
+                }                
             }
 
             xhr.onerror = function(error) {
                 handleError();
             }
             
-            xhr.open("GET", pools[pool].url + pools[pool].token, true);
+            xhr.open("GET", pools[pool].url + options[pool].token, true);
             xhr.send(null);
         } catch(e) {
             handleError();
         }
+        return data;
     }
     
     chrome.browserAction.onClicked.addListener(function(tab) {

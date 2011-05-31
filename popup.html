@@ -4,15 +4,21 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <title>Bitcoin Mining Monitor</title>
         <script>
+            
             window.onload = function(){
-                chrome.extension.getBackgroundPage().getData(function(data){
-                    ['confirmed_reward', 'hashrate', 'workers_formatted', 'payout_history'].forEach(function(el){
-                        document.getElementById(el).textContent = data[el];
-                    });                    
-                }, function(){
-                    document.getElementById('error').textContent = 'Invalid token';
-                });                
-            }
+                var pools = chrome.extension.getBackgroundPage().pools; 
+                var data = chrome.extension.getBackgroundPage().getData(); 
+                var html = [];
+                for(var p in data){
+                    var h = '<div><h3>' + pools[p].title + '</h3><h4></h4><table>';
+                    var rows = [];
+                    for(var i = 0; i < pools[p].fields.length; i++){
+                        rows.push('<tr><td>' + chrome.i18n.getMessage(pools[p].fields[i]) + '</td><td>' + data[p][pools[p].fields[i]] + '</td></tr>');
+                    }
+                    html.push(h + rows.join('') +'</table></div>');
+                }
+                document.getElementById('pools').innerHTML = html.join('');                   
+            }            
         </script>
         <style>
             h4 {
@@ -21,15 +27,7 @@
         </style>
     </head>
     <body>
-        <div>
-            <h3>deepbit.net</h3>
-            <h4 id="error"></h4>
-            <table>
-                <tr><td>Reward</td><td id="confirmed_reward"></td></tr>
-                <tr><td>Hashrate</td><td id="hashrate"></td></tr>
-                <tr><td>Workers</td><td id="workers_formatted"></td></tr>
-                <tr><td>Payout</td><td id="payout_history"></td></tr>
-            </table>
+        <div id="pools">
 
         </div>
     </body>

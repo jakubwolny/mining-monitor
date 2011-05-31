@@ -4,14 +4,23 @@ try {
 }catch(e){  
 }
 var defaults = {
-    deepbit_token: ''  
-//    deepbit_workers: 1,
-//    deepbit_hashrate: 200
+    deepbit: {
+        token: ''
+    },
+    slush: {
+        token: ''
+    },
+    btcguild: {
+        token: ''
+    }
 };
 
 var options = $.extend({}, defaults, data);
 
 window.onload = function(){
+    $('.lang').text(function(){
+        return chrome.i18n.getMessage($(this).attr('id'));
+    });
 
     $('#save').val(chrome.i18n.getMessage('save'));
      
@@ -20,10 +29,9 @@ window.onload = function(){
         location.reload();       
     });
 
-    $('#deepbit_token').val(options.deepbit_token)
-    //    $('#deepbit_workers').val(options.deepbit_workers)
-    //    $('#deepbit_hashrate').val(options.deepbit_hashrate)
-
+    $('#deepbit_token').val(options.deepbit.token)
+    $('#slush_token').val(options.slush.token)
+    $('#btcguild_token').val(options.btcguild.token)
 
     $('input[type="text"]').keyup(function(){
         $('#save').removeClass('saved').val(chrome.i18n.getMessage('save'));
@@ -31,9 +39,15 @@ window.onload = function(){
 
     $('form').submit(function(){
         var data = {
-            deepbit_token: $('#deepbit_token').val()
-        //            deepbit_workers: $('#deepbit_workers').val(),
-        //            deepbit_hashrate: $('#deepbit_hashrate').val()
+            deepbit: {
+                token: $('#deepbit_token').val()
+            },
+            slush: {
+                token: $('#slush_token').val()
+            },
+            btcguild: {
+                token: $('#btcguild_token').val()
+            }        
         }
         console.log(data);
         window.localStorage.options = JSON.stringify(data);
