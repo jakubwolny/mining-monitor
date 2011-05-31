@@ -52,6 +52,7 @@ window.onload = function(){
         console.log(data);
         window.localStorage.options = JSON.stringify(data);
         chrome.extension.getBackgroundPage().updateOptions();
+        chrome.extension.getBackgroundPage().startRequest();
         $('#save').addClass('saved').val(chrome.i18n.getMessage('saved'));
         return false;
     }).change(function(){

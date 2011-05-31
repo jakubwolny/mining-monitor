@@ -2,13 +2,14 @@
     var pollIntervalMin = 1000 * 60; 
     var pollIntervalMax = 1000 * 60 * 10;  
     var requestFailureCount = 0;  // used for exponential backoff
-    var requestTimeout = 1000 * 5;  // 5 seconds
+    var requestTimeout = 1000 * 60;
     var options = {};
     var data = {}; // current data
+    var scheduled = false;
     
     var pools = {
         deepbit: {
-            title: 'deepbit.net',
+            title: "deepbit.net",
             url: "https://deepbit.net/api/",
             fields: ["confirmed_reward", "hashrate", "workers_formatted", "payout_history"],
             hydrate: function(data){
@@ -27,7 +28,7 @@
             }
         },
         slush: {
-            title: 'mining.bitcoin.cz',
+            title: "mining.bitcoin.cz",
             url: "http://mining.bitcoin.cz/accounts/profile/json/",
             fields: ["confirmed_reward", "estimated_reward", "send_threshold", "unconfirmed_reward", "username", "wallet"],
             hydrate: function(data){                
@@ -35,7 +36,7 @@
             }
         },
         btcguild: {
-            title: 'btcguild.com',
+            title: "btcguild.com",
             url: "http://btcguild.com/api.php?api_key=",
             fields: ["hashrate", "confirmed_rewards", "unconfirmed_rewards", "estimated_rewards", "payouts"],
             hydrate: function(data){             
@@ -78,35 +79,40 @@
     }    
     
     function scheduleRequest() {
-        //        var randomness = Math.random() * 2;
-        //        var exponent = Math.pow(2, requestFailureCount);
-        //        var delay = Math.min(randomness * pollIntervalMin * exponent, 
-        //        pollIntervalMax);
-        //        delay = Math.round(delay);
-        //
-        //        window.setTimeout(startRequest, delay);
+        if(!scheduled){
+            scheduled = true;
+            var randomness = Math.random() * 2;
+            var exponent = Math.pow(2, requestFailureCount);
+            var delay = Math.min(randomness * pollIntervalMin * exponent, 
+            pollIntervalMax);
+            delay = Math.round(delay);
+
+            window.setTimeout(startRequest, delay); 
+        }       
     }
 
     function startRequest() {
         for(var pool in pools){
             if(options[pool].token){
-                getData(pool);
+                console.log(pool);
+                getData(pool,
+                function(count) {            
+                    scheduleRequest();
+                },
+                function() {            
+                    scheduleRequest();
+                });
             }
         }
-        
-        //        getData(
-        //        function(count) {            
-        //            scheduleRequest();
-        //        },
-        //        function() {            
-        //            scheduleRequest();
-        //        }
-        //    );
+        scheduled = false;
     }
     
     function getData(pool, onSuccess, onError) {
         var xhr = new XMLHttpRequest(); 
         var abortTimerId = window.setTimeout(function() {
+            data[pool] = {
+                error: 'Timeout'
+            }
             xhr.abort();  // synchronously calls onreadystatechange
         }, requestTimeout);
         
@@ -114,8 +120,12 @@
             ++requestFailureCount;
             window.clearTimeout(abortTimerId);
             chrome.browserAction.setBadgeText({
-                text: '!'
+                text: "!"
             });
+            
+            data[pool] = {
+                error: 'Error'
+            }
             
             chrome.browserAction.setBadgeBackgroundColor({
                 color: [255, 0, 0, 255]
@@ -128,28 +138,27 @@
         function handleSuccess(pool, result) {
             requestFailureCount = 0;
             chrome.browserAction.setBadgeText({
-                text: ''
+                text: ""
             });
             
             window.clearTimeout(abortTimerId);
             data[pool] = pools[pool].hydrate(result);
             
             if (onSuccess){
-                //                onSuccess(data);
-            }               
+                onSuccess(data);
+            }
         }
         
         try {
             xhr.onreadystatechange = function(){
-                console.log(xhr);
                 if (xhr.readyState != 4){
                     return;
                 }
-                //                if(xhr.status != 200){
-                //                    handleError();
-                //                    return;
-                //                }
-                if(xhr.responseText != ''){
+                if(xhr.status != 200){
+                    handleError();
+                    return;
+                }
+                if(xhr.responseText != ""){
                     handleSuccess(pool, JSON.parse(xhr.responseText));    
                 }                
             }
@@ -163,7 +172,6 @@
         } catch(e) {
             handleError();
         }
-        return data;
     }
     
     chrome.browserAction.onClicked.addListener(function(tab) {
