@@ -16,5 +16,17 @@
     },    
     "restore_defaults": {
         "message": "Restore defaults"
+    },
+    "confirmed_reward": {
+        "message": ""
+    },
+    "hashrate": {
+        "message": ""
+    },
+    "workers_formatted": {
+        "message": ""
+    },
+    "payout_history": {
+        "message": ""
     }
 }

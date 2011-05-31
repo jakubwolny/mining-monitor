@@ -4,8 +4,44 @@
     var requestFailureCount = 0;  // used for exponential backoff
     var requestTimeout = 1000 * 5;  // 5 seconds
     var options = {};
+    var data = {}; // current data
     
-    function updateOptions(lang){
+    var pools = {
+        deepbit: {
+            url: "https://deepbit.net/api/",
+            token: "4ddd2228816197c24f000008_F71182E6D0",
+            hydrate: function(data){
+                data.workers_alive = 0;
+                data.workers_all = 0;
+                for (var i in data.workers) {
+                    if (data.workers.hasOwnProperty(i)) {
+                        data.workers_all++;
+                        if(data.workers[i].alive){
+                            data.workers_alive ++;
+                        }
+                    }
+                }
+                data.workers_formatted = data.workers_alive + '/' + data.workers_all;
+                return data;
+            }
+        },
+        slush: {
+            url: "http://mining.bitcoin.cz/accounts/profile/json/",
+            token: "12382-c6e66196e85bfaa6a0b479cff025b26e",
+            hydrate: function(data){                
+                return data;
+            }
+        },
+        btcguild: {
+            url: "http://btcguild.com/api.php?api_key=",
+            token: "20dcc28f31da99897163ea583c52ede9",
+            hydrate: function(data){                
+                return data;
+            }
+        }
+    }
+    
+    function updateOptions(){
         try {
             options = JSON.parse(localStorage.options);
         }catch(e){
@@ -23,31 +59,36 @@
     }    
     
     function scheduleRequest() {
-        var randomness = Math.random() * 2;
-        var exponent = Math.pow(2, requestFailureCount);
-        var delay = Math.min(randomness * pollIntervalMin * exponent, 
-        pollIntervalMax);
-        delay = Math.round(delay);
-
-        window.setTimeout(startRequest, delay);
+        //        var randomness = Math.random() * 2;
+        //        var exponent = Math.pow(2, requestFailureCount);
+        //        var delay = Math.min(randomness * pollIntervalMin * exponent, 
+        //        pollIntervalMax);
+        //        delay = Math.round(delay);
+        //
+        //        window.setTimeout(startRequest, delay);
     }
 
     function startRequest() {
-        getData(
-        function(count) {            
-            scheduleRequest();
-        },
-        function() {            
-            scheduleRequest();
-        }
-    );
+        ['deepbit', 'slush'].forEach(function(e){
+            getData(e);
+        });
+        
+        
+        //        getData(
+        //        function(count) {            
+        //            scheduleRequest();
+        //        },
+        //        function() {            
+        //            scheduleRequest();
+        //        }
+        //    );
     }
     
-    function getData(onSuccess, onError) {
-        if(options.deepbit_token == ''){
-            handleError();
-            return;
-        }
+    function getData(pool, onSuccess, onError) {
+        //        if(options.deepbit_token == ''){
+        //            handleError();
+        //            return;
+        //        }
         
         var xhr = new XMLHttpRequest(); 
         var abortTimerId = window.setTimeout(function() {
@@ -69,15 +110,17 @@
             }      
         }
         
-        function handleSuccess(data) {
+        function handleSuccess(pool, result) {
             requestFailureCount = 0;
             chrome.browserAction.setBadgeText({
                 text: ''
             });
             
             window.clearTimeout(abortTimerId);
+            data[pool] = pools[pool].hydrate(result);
+            console.log(data);
             if (onSuccess){
-                onSuccess(data);
+                //                onSuccess(data);
             }
                
         }
@@ -88,35 +131,19 @@
                 if (xhr.readyState != 4){
                     return;
                 }
-                if(xhr.status != 200){
-                    handleError();
-                    return;
-                }
+//                if(xhr.status != 200){
+//                    handleError();
+//                    return;
+//                }
                 
-                var data = JSON.parse(xhr.responseText);    
-                
-                data.workers_alive = 0;
-                data.workers_all = 0;
-                for (var i in data.workers) {
-                    if (data.workers.hasOwnProperty(i)) {
-                        data.workers_all++;
-                        if(data.workers[i].alive){
-                            data.workers_alive ++;
-                        }
-                    }
-                }
-                data.workers_formatted = data.workers_alive + '/' + data.workers_all;
-                handleSuccess(data);
-                
-                //                var reward = data.confirmed_reward.toString().slice(0, 4).replace(/\.$/, '');;
-                //                var hashrate = data.hashrate.toString().slice(0, 4).replace(/\.$/, '');
+                handleSuccess(pool, JSON.parse(xhr.responseText));
             }
 
             xhr.onerror = function(error) {
                 handleError();
             }
             
-            xhr.open("GET", "http://deepbit.net/api/" + options.deepbit_token, true);
+            xhr.open("GET", pools[pool].url + pools[pool].token, true);
             xhr.send(null);
         } catch(e) {
             handleError();

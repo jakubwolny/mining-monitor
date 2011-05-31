@@ -6,7 +6,7 @@
     "icons": { 
         "16": "img/16.png",
         "48": "img/48.png",
-		"128": "img/128.png"
+        "128": "img/128.png"
     },
     "default_locale": "en",  
     "browser_action": {
@@ -16,5 +16,9 @@
     },  
     "background_page": "background.html",
     "options_page": "options.html",
-    "permissions": [ "notifications", "http://deepbit.net/", "http://btcmine.com/" ]
+    "permissions": [ 
+    "notifications", 
+    "*://deepbit.net/",
+    "*://mining.bitcoin.cz/", 
+    "http://btcguild.com/" ]
 }
