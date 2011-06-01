@@ -52,6 +52,14 @@
                 result.hashrate = result.workers_all > 0 ? hashrate / result.workers_all : 0;
                 return result;
             }
+        },     
+        btcmine: {
+            title: "btcmine.com",
+            url: "http://btcmine.com/api/getstats/",
+            fields: ["total_payout", "total_bounty", "confirmed_bounty", "solved_blocks", "estimated_bounty", "round_shares", "unconfirmed_bounty", "hashrate", "solved_shares"],
+            hydrate: function(data){
+                return data;
+            }
         }
     }
     
@@ -68,6 +76,9 @@
                 token: ''
             },
             btcguild: {
+                token: ''
+            },
+            btcmine: {
                 token: ''
             }
         };

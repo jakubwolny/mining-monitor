@@ -12,6 +12,9 @@ var defaults = {
     },
     btcguild: {
         token: ''
+    },
+    btcmine: {
+        token: ''
     }
 };
 
@@ -29,9 +32,10 @@ window.onload = function(){
         location.reload();       
     });
 
-    $('#deepbit_token').val(options.deepbit.token)
-    $('#slush_token').val(options.slush.token)
-    $('#btcguild_token').val(options.btcguild.token)
+    $('#deepbit_token').val(options.deepbit.token);
+    $('#slush_token').val(options.slush.token);
+    $('#btcguild_token').val(options.btcguild.token);
+    $('#btcmine_token').val(options.btcmine.token);
 
     $('input[type="text"]').keyup(function(){
         $('#save').removeClass('saved').val(chrome.i18n.getMessage('save'));
@@ -47,7 +51,10 @@ window.onload = function(){
             },
             btcguild: {
                 token: $('#btcguild_token').val()
-            }        
+            },
+            btcmine: {
+                token: $('#btcmine_token').val()
+            }
         }
         console.log(data);
         window.localStorage.options = JSON.stringify(data);

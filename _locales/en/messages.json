@@ -1,6 +1,6 @@
 {
     "extension_description": {
-        "message": "Watch your mining progress in the Chrome - deepbit.net, mining.bitcoin.cz and btcguild.com support"
+        "message": "Watch your mining progress in the Chrome - deepbit.net, mining.bitcoin.cz, btcguild.com and btcmine.com support"
     },
     "extension_action" : {
         "message": "Check now"
@@ -18,42 +18,66 @@
         "message": "Restore defaults"
     },
     "confirmed_reward": {
-        "message": "Reward:"
+        "message": "Reward"
     },
     "hashrate": {
-        "message": "Hashrate:"
+        "message": "Hashrate"
     },
     "workers_formatted": {
-        "message": "Workers:"
+        "message": "Workers"
     },
     "payout_history": {
-        "message": "Payout:"
+        "message": "Payout"
     },
     "estimated_reward": {
-        "message": "Estimated:"
+        "message": "Estimated"
     },
     "send_threshold": {
-        "message": "Threshold:"
+        "message": "Threshold"
     },
     "unconfirmed_reward": {
-        "message": "Unconfirmed:"
+        "message": "Unconfirmed"
     },
     "username": {
-        "message": "Username:"
+        "message": "Username"
     },
     "wallet": {
-        "message": "Wallet:"
+        "message": "Wallet"
     },
     "confirmed_rewards": {
-        "message": "Reward:"
+        "message": "Reward"
     },
     "unconfirmed_rewards": {
-        "message": "Unconfirmed:"
+        "message": "Unconfirmed"
     },
     "estimated_rewards": {
-        "message": "Estimated:"
+        "message": "Estimated"
     },
     "payouts": {
-        "message": "Payout:"
+        "message": "Payout"
+    },
+    "total_payout": {
+        "message": "Payout"
+    },
+    "total_bounty": {
+        "message": "Total bounty"
+    },
+    "confirmed_bounty": {
+        "message": "Confirmed"
+    },
+    "solved_blocks": {
+        "message": "Solved blocks"
+    },
+    "estimated_bounty": {
+        "message": "Estimated"
+    },
+    "round_shares": {
+        "message": "Round shares"
+    },
+    "unconfirmed_bounty": {
+        "message": "Unconfirmed"
+    },
+    "solved_shares": {
+        "message": "Solved shares"
     }
 }
