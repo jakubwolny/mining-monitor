@@ -1,5 +1,6 @@
 #### Bitcoin Mining Monitor - watch your mining progress in the Chrome
 Support:
+
 * deepbit.net
 * mining.bitcoin.cz
 * btcguild.com
