@@ -74,7 +74,7 @@
         btcmine: {
             title: "btcmine.com",
             url: "http://btcmine.com/api/getstats/",
-            fields: ["total_payout", "total_bounty", "confirmed_bounty", "solved_blocks", "estimated_bounty", "round_shares", "unconfirmed_bounty", "hashrate", "solved_shares"],
+            fields: ["hashrate", "total_bounty", "confirmed_bounty", "unconfirmed_bounty", "estimated_bounty", "solved_blocks", "round_shares", "solved_shares", "total_payout"],
             hydrate: function(data){
                 return data;
             }
