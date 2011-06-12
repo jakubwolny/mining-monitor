@@ -44,15 +44,6 @@
     "wallet": {
         "message": "Wallet"
     },
-    "confirmed_rewards": {
-        "message": "Reward"
-    },
-    "unconfirmed_rewards": {
-        "message": "Unconfirmed"
-    },
-    "estimated_rewards": {
-        "message": "Estimated"
-    },
     "payouts": {
         "message": "Payout"
     },
@@ -62,22 +53,19 @@
     "total_bounty": {
         "message": "Total bounty"
     },
-    "confirmed_bounty": {
-        "message": "Confirmed"
-    },
     "solved_blocks": {
         "message": "Solved blocks"
-    },
-    "estimated_bounty": {
-        "message": "Estimated"
     },
     "round_shares": {
         "message": "Round shares"
     },
-    "unconfirmed_bounty": {
-        "message": "Unconfirmed"
-    },
     "solved_shares": {
         "message": "Solved shares"
+    },
+    "summary": {
+        "message": "summary"
+    },
+    "summary_label": {
+        "message": "Show summary"
     }
 }

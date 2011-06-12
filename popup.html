@@ -3,12 +3,23 @@
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <title>Bitcoin Mining Monitor</title>
-        <script>
-            
+        <script>            
             window.onload = function(){                
                 var pools = chrome.extension.getBackgroundPage().pools; 
                 var data = chrome.extension.getBackgroundPage().data; 
+                
                 var html = [];
+                
+                if(chrome.extension.getBackgroundPage().options.summary){
+                    var summary = chrome.extension.getBackgroundPage().summary;
+                    var h = '<div><h3>' + chrome.i18n.getMessage('summary') + '</h3><table>';
+                    var rows = [];
+                    var fields = chrome.extension.getBackgroundPage().pool.summaryfields;
+                    for(var i = 0; i < fields.length; i++){
+                        rows.push('<tr><td>' + chrome.i18n.getMessage(fields[i]) + '</td><td>' + summary[fields[i]] + '</td></tr>');
+                    }
+                    html.push(h + rows.join('') +'</table></div>');
+                }
                 
                 for(var p in data){                    
                     if(data[p].status){ 
@@ -24,16 +35,28 @@
                         html.push(h + rows.join('') +'</table></div>');
                                        
                     }
-                }
+                }                
+                
                 document.getElementById('pools').innerHTML = html.join('');                   
             }            
+        </script>
+        <script>
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-23642091-1']);
+            _gaq.push(['_trackPageview']);
+            
+            (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                ga.src = 'https://ssl.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
         </script>
         <style>
             h3 {
                 margin-bottom: 5px;
             }
             h4 {
-/*                color: #f00;*/
+                /*                color: #f00;*/
             }
             table {
                 width: 300px;

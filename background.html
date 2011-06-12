@@ -6,138 +6,209 @@
     var options = {};
     var data = {}; // current data    
     var scheduled = false;
+    var summary = {};
+    var defaults = {
+        deepbit: {
+            token: ''
+        },
+        slush: {
+            token: ''
+        },
+        btcguild: {
+            token: ''
+        },
+        btcmine: {
+            token: ''
+        },
+        summary: true
+    };
+    
+    function add(){
+        var result = 0;
+        var dp = 100000000; // decimal point for safety adding
+        for(var i = 0; i < arguments.length; i++){
+            result += parseInt(arguments[i] * dp, 10);
+        }
+        return result / dp;
+    }
+    
+    var pool = {
+        title: "",
+        url: "",
+        summaryfields: ["hashrate", "workers_formatted", "confirmed_reward", "unconfirmed_reward", "estimated_reward"],
+        fields: [],
+        init: function(){
+            this.fields = this.summaryfields.concat(this.fields);
+        },
+        preprocess: function(){
+            for(var field in this.fieldsMap){
+                this.data[field] = this.data[this.fieldsMap[field]];
+            }
+        },
+        process: function(){},
+        postprocess: function(){
+            this.data.hashrate = parseInt(this.data.hashrate, 10);
+            if(this.data.workers_all){
+                this.data.workers_formatted = this.data.workers_alive + '/' + this.data.workers_all;    
+            }            
+            this.data.confirmed_reward = parseFloat(this.data.confirmed_reward);
+            this.data.unconfirmed_reward = parseFloat(this.data.unconfirmed_reward);
+            this.data.estimated_reward = parseFloat(this.data.estimated_reward);
+            
+            summary.workers_all += this.data.workers_all;
+            summary.workers_alive += this.data.workers_alive;
+            summary.workers_formatted = summary.workers_alive + '/' + summary.workers_all;
+            summary.hashrate += this.data.hashrate;            
+            summary.confirmed_reward = add(summary.confirmed_reward, this.data.confirmed_reward);
+            summary.unconfirmed_reward = add(summary.unconfirmed_reward, this.data.unconfirmed_reward);
+            summary.estimated_reward = add(summary.estimated_reward, this.data.estimated_reward);
+        }
+    }
     
     var pools = {
         deepbit: {
             title: "deepbit.net",
             url: "https://deepbit.net/api/",
-            fields: ["hashrate", "workers_formatted", "confirmed_reward", "payout_history"],
-            process: function(data){
-                data.workers_alive = 0;
-                data.workers_all = 0;                
-                for (var i in data.workers) {                   
-                    data.workers_all++;
-                    if(data.workers[i].alive){
-                        data.workers_alive ++;
+            fields: ["payout_history"],
+            process: function(){                
+                this.data.workers_alive = 0;
+                this.data.workers_all = 0;                
+                for (var i in  this.data.workers) {                   
+                    this.data.workers_all++;
+                    if( this.data.workers[i].alive){
+                        this.data.workers_alive ++;
                     }                   
                 }
-                data.hashrate = parseInt(data.hashrate, 10);
-                data.workers_formatted = data.workers_alive + '/' + data.workers_all;
-                return data;
+                this.data.unconfirmed_reward = 0;
+                this.data.estimated_reward = 0;
             }
         },
         slush: {
             title: "mining.bitcoin.cz",
             url: "http://mining.bitcoin.cz/accounts/profile/json/",
-            fields: ["hashrate", "workers_formatted", "confirmed_reward", "unconfirmed_reward", "estimated_reward"],
-            process: function(data){                
-                data.workers_alive = 0;
-                data.workers_all = 0;
-                data.hashrate = 0;                
-                for (var i in data.workers) {                    
-                    data.workers_all++;
-                    data.hashrate += data.workers[i].hashrate;
+            fields: [],
+            process: function(){                
+                this.data.workers_alive = 0;
+                this.data.workers_all = 0;
+                this.data.hashrate = 0;                
+                for (var i in this.data.workers) {                    
+                    this.data.workers_all++;
+                    this.data.hashrate += this.data.workers[i].hashrate;
                     
-                    if(data.workers[i].alive){
-                        data.workers_alive ++;
+                    if(this.data.workers[i].alive){
+                        this.data.workers_alive ++;
                     }                
-                }      
-                data.workers_formatted = data.workers_alive + '/' + data.workers_all;                
-                return data;
+                }
             }
         },
         btcguild: {
             title: "btcguild.com",
             url: "http://www.btcguild.com/api.php?api_key=",
-            fields: ["hashrate", "workers_formatted", "confirmed_rewards", "unconfirmed_rewards", "estimated_rewards", "payouts"],
-            process: function(data){             
-                var result = data.user;
-                var hashrate = 0;
+            fields: ["payouts"],
+            fieldsMap: {
+                confirmed_reward: "confirmed_rewards",
+                unconfirmed_reward: "unconfirmed_rewards",
+                estimated_reward: "estimated_rewards"
+            },
+            preprocess: function(){
+                for(var field in this.fieldsMap){
+                    this.data.user[field] = this.data.user[this.fieldsMap[field]];
+                }
+            },
+            process: function(){             
+                var result = this.data.user;
+                result.hashrate = 0;
                 result.workers_alive = 0;
                 result.workers_all = 0;
-                for (var i in data.workers) {                    
+                for (var i in this.data.workers) {                    
                     result.workers_all++;
-                    hashrate += data.workers[i].hash_rate;
+                    result.hashrate += this.data.workers[i].hash_rate;
                     
                     // 5 minutes delay
-                    if(data.workers[i].last_share != 'never' &&
-                        (new Date("1,1,1970 " + data.workers[i].last_share ).getTime()
+                    if(this.data.workers[i].last_share != 'never' &&
+                        (new Date("1,1,1970 " + this.data.workers[i].last_share ).getTime()
                         - new Date("1,1,1970").getTime())/1000 < 5 * 60){
                         result.workers_alive++;
                     }                   
-                }                
-                result.hashrate = parseInt(hashrate, 10);
-                result.workers_formatted = result.workers_alive + '/' + result.workers_all;
-                return result;
+                }
+                this.data = result;
             }
         },     
         btcmine: {
             title: "btcmine.com",
             url: "http://btcmine.com/api/getstats/",
-            fields: ["hashrate", "workers_formatted", "total_bounty", "confirmed_bounty", "unconfirmed_bounty", "estimated_bounty", "solved_blocks", "round_shares", "solved_shares", "total_payout"],
-            process: function(data){
+            fields: ["total_bounty", "solved_blocks", "round_shares", "solved_shares", "total_payout"],
+            fieldsMap: {
+                confirmed_reward: "confirmed_bounty",
+                unconfirmed_reward: "unconfirmed_bounty",
+                estimated_reward: "estimated_bounty"
+            },
+            process: function(){
                 var xhr = new XMLHttpRequest(); 
-                
+                var that = this;
+                this.data.workers_all = 0;
+                this.data.workers_alive = 0;
                 try {
                     xhr.onreadystatechange = function(){
                         if (xhr.readyState != 4){
                             return;
                         }
-                        
+                
                         if (xhr.status == 200 && xhr.responseText != ""){
                             var miners = JSON.parse(xhr.responseText); 
-                            data.workers_all =  miners.miners.length;
-                            data.workers_alive = 0;
+                            that.data.workers_all = miners.miners.length;                           
                             for(var i = 0; i < miners.miners.length; i++){
                                 if(miners.miners[i].online_status){
-                                    data.workers_alive++    
+                                    that.data.workers_alive++    
                                 }                                
                             }
-                            data.workers_formatted = data.workers_alive + '/' + data.workers_all;
+                            that.postprocess();
                         }                
                     }
-
+            
                     xhr.onerror = function(error) {
-                        
+                
                     }
             
                     xhr.open("GET", "http://btcmine.com/api/getminerstats/" + options.btcmine.token, true);
                     xhr.send(null);
                 } catch(e) {
-                    
+            
                 }
-                
-                return data;
             }
         }
     }
     
+    // little inheritance
+    for(var p in pools){
+        for(field in pool){
+            if(pools[p][field] == undefined){
+                pools[p][field] = pool[field];
+            }
+        }
+        pools[p].init();
+    }    
     
     
     function updateOptions(){
         try {
             options = JSON.parse(localStorage.options);
         }catch(e){
-        }
-        var defaults = {
-            deepbit: {
-                token: ''
-            },
-            slush: {
-                token: ''
-            },
-            btcguild: {
-                token: ''
-            },
-            btcmine: {
-                token: ''
-            }
-        };
+        }        
         for(var key in defaults){
             if(options[key] == undefined){
                 options[key] = defaults[key];
             }
-        }        
+        } 
+        var count = 0;
+        for(var pool in pools){
+            if(options[pool].token){
+                count++;
+            }
+        }
+        if(count == 1){
+            defaults.summary = false;
+        }
     }    
     
     function scheduleRequest() {
@@ -154,6 +225,15 @@
     }
 
     function startRequest() {
+        summary =  {
+            hashrate: 0,
+            workers_all: 0,
+            workers_alive: 0,            
+            confirmed_reward: 0,
+            unconfirmed_reward: 0,
+            estimated_reward: 0
+        };
+        
         for(var pool in pools){
             if(options[pool].token){
                 console.log(pool);
@@ -209,10 +289,15 @@
             });
             
             window.clearTimeout(abortTimerId);
-            data[pool] = pools[pool].process(result);
+            
+            pools[pool].data = result;
+            pools[pool].preprocess();
+            pools[pool].process();
+            pools[pool].postprocess();            
+            data[pool] = pools[pool].data;
             
             if (onSuccess){
-                onSuccess(data);
+                onSuccess();
             }
         }
         
@@ -248,4 +333,15 @@
     updateOptions();
     startRequest();
 
+</script>
+<script>
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-23642091-1']);
+    _gaq.push(['_trackPageview']);
+            
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = 'https://ssl.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
 </script>

@@ -3,21 +3,8 @@ try {
     data = JSON.parse(localStorage.options);   
 }catch(e){  
 }
-var defaults = {
-    deepbit: {
-        token: ''
-    },
-    slush: {
-        token: ''
-    },
-    btcguild: {
-        token: ''
-    },
-    btcmine: {
-        token: ''
-    }
-};
-
+var defaults = chrome.extension.getBackgroundPage().defaults;
+var pools = chrome.extension.getBackgroundPage().pools;
 var options = $.extend({}, defaults, data);
 
 window.onload = function(){
@@ -26,34 +13,38 @@ window.onload = function(){
     });
 
     $('#save').val(chrome.i18n.getMessage('save'));
-     
-    $('#restore_defaults').bind('click', function(){
-        window.localStorage.options = JSON.stringify(defaults);
-        location.reload();       
-    });
-
-    $('#deepbit_token').val(options.deepbit.token);
-    $('#slush_token').val(options.slush.token);
-    $('#btcguild_token').val(options.btcguild.token);
-    $('#btcmine_token').val(options.btcmine.token);
-
+    
     $('input[type="text"]').keyup(function(){
+        var count = 0;
+        for(var pool in pools){
+            if($('#' + pool + '_token').val() != ''){
+                count++;            
+            }
+        }
+        
+        if(count > 1){
+            $('#summary').attr('disabled', false);
+        }else{
+            $('#summary').attr('disabled', true);
+        }
+        
         $('#save').removeClass('saved').val(chrome.i18n.getMessage('save'));
     });
+     
+    for(var pool in pools){
+        $('#' + pool + '_token').val(options[pool].token).keyup();    
+    }    
+    
+    $('#summary').attr('checked', options.summary).change();
+    
 
     $('form').submit(function(){
-        var data = {
-            deepbit: {
-                token: $('#deepbit_token').val()
-            },
-            slush: {
-                token: $('#slush_token').val()
-            },
-            btcguild: {
-                token: $('#btcguild_token').val()
-            },
-            btcmine: {
-                token: $('#btcmine_token').val()
+        var data = {           
+            summary: $('#summary').is(':checked')
+        }
+        for(var pool in pools){
+            data[pool] = {
+                token: $('#' + pool + '_token').val()
             }
         }
         console.log(data);
