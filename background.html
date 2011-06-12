@@ -4,7 +4,8 @@
     var requestFailureCount = 0;  // used for exponential backoff
     var requestTimeout = 1000 * 60;
     var options = {};
-    var data = {}; // current data    
+    var data = {}; // current data
+    var ts; // timestamp
     var scheduled = false;
     var summary = {};
     var defaults = {
@@ -47,7 +48,7 @@
         },
         process: function(){},
         postprocess: function(){
-            this.data.hashrate = parseInt(this.data.hashrate, 10);
+            this.data.hashrate = parseInt(this.data.hashrate, 10);            
             if(this.data.workers_all){
                 this.data.workers_formatted = this.data.workers_alive + '/' + this.data.workers_all;    
             }            
@@ -58,7 +59,8 @@
             summary.workers_all += this.data.workers_all;
             summary.workers_alive += this.data.workers_alive;
             summary.workers_formatted = summary.workers_alive + '/' + summary.workers_all;
-            summary.hashrate += this.data.hashrate;            
+            summary.hashrate += this.data.hashrate;          
+            console.log(this.title, this.data.hashrate, summary.hashrate);
             summary.confirmed_reward = add(summary.confirmed_reward, this.data.confirmed_reward);
             summary.unconfirmed_reward = add(summary.unconfirmed_reward, this.data.unconfirmed_reward);
             summary.estimated_reward = add(summary.estimated_reward, this.data.estimated_reward);
@@ -161,8 +163,7 @@
                                 if(miners.miners[i].online_status){
                                     that.data.workers_alive++    
                                 }                                
-                            }
-                            that.postprocess();
+                            }                           
                         }                
                     }
             
@@ -238,6 +239,8 @@
             estimated_reward: 0
         };
         
+        ts = new Date();
+        
         for(var pool in pools){
             if(options[pool].token){
                 console.log(pool);
@@ -255,7 +258,7 @@
         scheduled = false;
     }
     
-    function getData(pool, onSuccess, onError) {
+    function getData(pool, onSuccess, onError) {        
         data[pool] = {
             status: 'Loading...'
         }

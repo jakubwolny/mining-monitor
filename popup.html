@@ -7,37 +7,40 @@
             window.onload = function(){                
                 var pools = chrome.extension.getBackgroundPage().pools; 
                 var data = chrome.extension.getBackgroundPage().data; 
-                
+                var fields = chrome.extension.getBackgroundPage().pool.summaryfields;
+                var ts = chrome.extension.getBackgroundPage().ts;
                 var html = [];
                 
-                if(chrome.extension.getBackgroundPage().options.summary){
-                    var summary = chrome.extension.getBackgroundPage().summary;
-                    var h = '<div><h3>' + chrome.i18n.getMessage('summary') + '</h3><table>';
-                    var rows = [];
-                    var fields = chrome.extension.getBackgroundPage().pool.summaryfields;
-                    for(var i = 0; i < fields.length; i++){
-                        rows.push('<tr><td>' + chrome.i18n.getMessage(fields[i]) + '</td><td>' + summary[fields[i]] + '</td></tr>');
-                    }
-                    html.push(h + rows.join('') +'</table></div>');
+                var rows = [];
+                for(var i = 0; i < fields.length; i++){
+                    rows.push(chrome.i18n.getMessage(fields[i]));                                                        
                 }
+                html.push('<table><thead><th>pool</th><th>' + rows.join('</th><th>')  + '</th></thead><tbody>');                
                 
                 for(var p in data){                    
                     if(data[p].status){ 
-                        html.push('<div><h3>' + pools[p].title + '</h3><h4>' + data[p].status + '</div>');
+                        html.push('<tr><td>' + pools[p].title + '</td><td>' + data[p].status + '</td></tr>');  
                     }else {
-                        var h = '<div><h3>' + pools[p].title + '</h3><table>';
                         var rows = [];
-                        for(var i = 0; i < pools[p].fields.length; i++){
+                        for(var i = 0; i < fields.length; i++){
                             var value = data[p][pools[p].fields[i]] == undefined ? '-' : data[p][pools[p].fields[i]];
-                            rows.push('<tr><td>' + chrome.i18n.getMessage(pools[p].fields[i]) + '</td><td>' + value + '</td></tr>');    
-                                                        
+                            rows.push(value);                                                        
                         }
-                        html.push(h + rows.join('') +'</table></div>');
-                                       
+                        html.push('<tr><td>' + pools[p].title + '</td><td>' + rows.join('</td><td>') + '</td></tr>');                                       
                     }
-                }                
+                }  
                 
-                document.getElementById('pools').innerHTML = html.join('');                   
+                if(chrome.extension.getBackgroundPage().options.summary){
+                    var summary = chrome.extension.getBackgroundPage().summary;
+                    var rows = [];                   
+                    for(var i = 0; i < fields.length; i++){
+                        rows.push(summary[fields[i]]);
+                    }
+                    html.push('<tr id="summary"><td>' + chrome.i18n.getMessage('summary') + '</td><td>' + rows.join('</td><td>') + '</td></tr>');
+                }
+                
+                document.getElementById('pools').innerHTML = html.join('') + '</tbody></table>';                
+                document.getElementById('ts').textContent = ts.getHours() + ':' + ts.getMinutes();
             }            
         </script>
         <script>
@@ -58,8 +61,24 @@
             h4 {
                 /*                color: #f00;*/
             }
+            #summary {
+                font-weight: bolder;
+                border-top: 1px solid #000;
+            }
             table {
                 width: 300px;
+            }
+            tr:nth-child(even){
+                background: #e6e6e6;
+            }
+            tr:nth-child(odd){
+
+            }
+            td:nth-child(2){
+                text-align: right;
+            }
+            td:nth-child(3){
+                text-align: center;
             }
         </style>
     </head>
@@ -67,5 +86,6 @@
         <div id="pools">
 
         </div>
-    </body>
+        <p>Auto updates every 5 mins - Updated: <span id="ts"></span></p>
+    </body> 
 </html>
