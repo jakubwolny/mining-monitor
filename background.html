@@ -194,21 +194,25 @@
         try {
             options = JSON.parse(localStorage.options);
         }catch(e){
-        }        
-        for(var key in defaults){
-            if(options[key] == undefined){
-                options[key] = defaults[key];
-            }
-        } 
+        }    
+        
         var count = 0;
         for(var pool in pools){
             if(options[pool].token){
                 count++;
             }
         }
-        if(count == 1){
+        if(count > 1){            
+            defaults.summary = true;
+        }else {
             defaults.summary = false;
         }
+        
+        for(var key in defaults){
+            if(options[key] == undefined){
+                options[key] = defaults[key];
+            }
+        }      
     }    
     
     function scheduleRequest() {
