@@ -163,7 +163,8 @@
                                 if(miners.miners[i].online_status){
                                     that.data.workers_alive++    
                                 }                                
-                            }                           
+                            }
+                            that.data.workers_formatted = that.data.workers_alive + '/' + that.data.workers_all;    
                         }                
                     }
             
