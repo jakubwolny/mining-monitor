@@ -14,13 +14,14 @@
             fields: ["hashrate", "workers_formatted", "confirmed_reward", "payout_history"],
             hydrate: function(data){
                 data.workers_alive = 0;
-                data.workers_all = 0;
+                data.workers_all = 0;                
                 for (var i in data.workers) {                   
                     data.workers_all++;
                     if(data.workers[i].alive){
                         data.workers_alive ++;
                     }                   
                 }
+                data.hashrate = parseInt(data.hashrate, 10);
                 data.workers_formatted = data.workers_alive + '/' + data.workers_all;
                 return data;
             }
@@ -28,8 +29,20 @@
         slush: {
             title: "mining.bitcoin.cz",
             url: "http://mining.bitcoin.cz/accounts/profile/json/",
-            fields: ["confirmed_reward", "estimated_reward", "send_threshold", "unconfirmed_reward", "username", "wallet"],
+            fields: ["hashrate", "workers_formatted", "confirmed_reward", "unconfirmed_reward", "estimated_reward"],
             hydrate: function(data){                
+                data.workers_alive = 0;
+                data.workers_all = 0;
+                data.hashrate = 0;                
+                for (var i in data.workers) {                    
+                    data.workers_all++;
+                    data.hashrate += data.workers[i].hashrate;
+                    
+                    if(data.workers[i].alive){
+                        data.workers_alive ++;
+                    }                
+                }      
+                data.workers_formatted = data.workers_alive + '/' + data.workers_all;                
                 return data;
             }
         },
@@ -53,7 +66,7 @@
                         result.workers_alive++;
                     }                   
                 }                
-                result.hashrate = hashrate;                
+                result.hashrate = parseInt(hashrate, 10);
                 result.workers_formatted = result.workers_alive + '/' + result.workers_all;
                 return result;
             }
