@@ -36,11 +36,12 @@ window.onload = function(){
     }    
     
     $('#summary').attr('checked', options.summary).change();
-    
+    $('input[name="badge"]').val([options.badge]);
 
     $('form').submit(function(){
         var data = {           
-            summary: $('#summary').is(':checked')
+            summary: $('#summary').is(':checked'),
+            badge: $('input[name="badge"]:checked').val()
         }
         for(var pool in pools){
             data[pool] = {
