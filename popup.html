@@ -5,22 +5,25 @@
         <title>Bitcoin Mining Monitor</title>
         <script>
             
-            window.onload = function(){
+            window.onload = function(){                
                 var pools = chrome.extension.getBackgroundPage().pools; 
                 var data = chrome.extension.getBackgroundPage().data; 
                 var html = [];
                 
-                for(var p in data){
-                    if(data[p].error){                        
-                        html.push('<div><h3>' + pools[p].title + '</h3><h4>' + data[p].error + '</div>');
+                for(var p in data){                    
+                    if(data[p].status){ 
+                        html.push('<div><h3>' + pools[p].title + '</h3><h4>' + data[p].status + '</div>');
                     }else {
                         var h = '<div><h3>' + pools[p].title + '</h3><table>';
                         var rows = [];
                         for(var i = 0; i < pools[p].fields.length; i++){
-                            rows.push('<tr><td>' + chrome.i18n.getMessage(pools[p].fields[i]) + '</td><td>' + data[p][pools[p].fields[i]] + '</td></tr>');
+                            var value = data[p][pools[p].fields[i]] == undefined ? '-' : data[p][pools[p].fields[i]];
+                            rows.push('<tr><td>' + chrome.i18n.getMessage(pools[p].fields[i]) + '</td><td>' + value + '</td></tr>');    
+                                                        
                         }
                         html.push(h + rows.join('') +'</table></div>');
-                    }                   
+                                       
+                    }
                 }
                 document.getElementById('pools').innerHTML = html.join('');                   
             }            
@@ -30,7 +33,7 @@
                 margin-bottom: 5px;
             }
             h4 {
-                color: #f00;
+/*                color: #f00;*/
             }
             table {
                 width: 300px;

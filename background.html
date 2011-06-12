@@ -4,7 +4,7 @@
     var requestFailureCount = 0;  // used for exponential backoff
     var requestTimeout = 1000 * 60;
     var options = {};
-    var data = {}; // current data
+    var data = {}; // current data    
     var scheduled = false;
     
     var pools = {
@@ -12,7 +12,7 @@
             title: "deepbit.net",
             url: "https://deepbit.net/api/",
             fields: ["hashrate", "workers_formatted", "confirmed_reward", "payout_history"],
-            hydrate: function(data){
+            process: function(data){
                 data.workers_alive = 0;
                 data.workers_all = 0;                
                 for (var i in data.workers) {                   
@@ -30,7 +30,7 @@
             title: "mining.bitcoin.cz",
             url: "http://mining.bitcoin.cz/accounts/profile/json/",
             fields: ["hashrate", "workers_formatted", "confirmed_reward", "unconfirmed_reward", "estimated_reward"],
-            hydrate: function(data){                
+            process: function(data){                
                 data.workers_alive = 0;
                 data.workers_all = 0;
                 data.hashrate = 0;                
@@ -50,7 +50,7 @@
             title: "btcguild.com",
             url: "http://www.btcguild.com/api.php?api_key=",
             fields: ["hashrate", "workers_formatted", "confirmed_rewards", "unconfirmed_rewards", "estimated_rewards", "payouts"],
-            hydrate: function(data){             
+            process: function(data){             
                 var result = data.user;
                 var hashrate = 0;
                 result.workers_alive = 0;
@@ -74,8 +74,39 @@
         btcmine: {
             title: "btcmine.com",
             url: "http://btcmine.com/api/getstats/",
-            fields: ["hashrate", "total_bounty", "confirmed_bounty", "unconfirmed_bounty", "estimated_bounty", "solved_blocks", "round_shares", "solved_shares", "total_payout"],
-            hydrate: function(data){
+            fields: ["hashrate", "workers_formatted", "total_bounty", "confirmed_bounty", "unconfirmed_bounty", "estimated_bounty", "solved_blocks", "round_shares", "solved_shares", "total_payout"],
+            process: function(data){
+                var xhr = new XMLHttpRequest(); 
+                
+                try {
+                    xhr.onreadystatechange = function(){
+                        if (xhr.readyState != 4){
+                            return;
+                        }
+                        
+                        if (xhr.status == 200 && xhr.responseText != ""){
+                            var miners = JSON.parse(xhr.responseText); 
+                            data.workers_all =  miners.miners.length;
+                            data.workers_alive = 0;
+                            for(var i = 0; i < miners.miners.length; i++){
+                                if(miners.miners[i].online_status){
+                                    data.workers_alive++    
+                                }                                
+                            }
+                            data.workers_formatted = data.workers_alive + '/' + data.workers_all;
+                        }                
+                    }
+
+                    xhr.onerror = function(error) {
+                        
+                    }
+            
+                    xhr.open("GET", "http://btcmine.com/api/getminerstats/" + options.btcmine.token, true);
+                    xhr.send(null);
+                } catch(e) {
+                    
+                }
+                
                 return data;
             }
         }
@@ -133,16 +164,21 @@
                 function() {            
                     scheduleRequest();
                 });
+            }else {
+                delete data[pool];
             }
         }
         scheduled = false;
     }
     
     function getData(pool, onSuccess, onError) {
+        data[pool] = {
+            status: 'Loading...'
+        }
         var xhr = new XMLHttpRequest(); 
         var abortTimerId = window.setTimeout(function() {
             data[pool] = {
-                error: 'Timeout'
+                status: 'Timeout'
             }
             xhr.abort();  // synchronously calls onreadystatechange
         }, requestTimeout);
@@ -155,7 +191,7 @@
             });
             
             data[pool] = {
-                error: 'Error'
+                status: 'Error'
             }
             
             chrome.browserAction.setBadgeBackgroundColor({
@@ -173,7 +209,7 @@
             });
             
             window.clearTimeout(abortTimerId);
-            data[pool] = pools[pool].hydrate(result);
+            data[pool] = pools[pool].process(result);
             
             if (onSuccess){
                 onSuccess(data);
