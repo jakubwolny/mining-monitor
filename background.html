@@ -8,6 +8,7 @@
     var ts; // timestamp
     var scheduled = false;
     var summary = {};
+    var count = 0;
     var defaults = {
         deepbit: {
             token: ''
@@ -198,7 +199,6 @@
         }catch(e){
         }    
         
-        var count = 0;
         for(var pool in pools){
             if(options[pool].token){
                 count++;

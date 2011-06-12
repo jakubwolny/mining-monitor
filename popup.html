@@ -9,38 +9,42 @@
                 var data = chrome.extension.getBackgroundPage().data; 
                 var fields = chrome.extension.getBackgroundPage().pool.summaryfields;
                 var ts = chrome.extension.getBackgroundPage().ts;
-                var html = [];
                 
-                var rows = [];
-                for(var i = 0; i < fields.length; i++){
-                    rows.push(chrome.i18n.getMessage(fields[i]));                                                        
-                }
-                html.push('<table><thead><th>pool</th><th>' + rows.join('</th><th>')  + '</th></thead><tbody>');                
-                
-                for(var p in data){                    
-                    if(data[p].status){ 
-                        html.push('<tr><td>' + pools[p].title + '</td><td>' + data[p].status + '</td></tr>');  
-                    }else {
-                        var rows = [];
-                        for(var i = 0; i < fields.length; i++){
-                            var value = data[p][pools[p].fields[i]] == undefined ? '-' : data[p][pools[p].fields[i]];
-                            rows.push(value);                                                        
-                        }
-                        html.push('<tr><td>' + pools[p].title + '</td><td>' + rows.join('</td><td>') + '</td></tr>');                                       
-                    }
-                }  
-                
-                if(chrome.extension.getBackgroundPage().options.summary){
-                    var summary = chrome.extension.getBackgroundPage().summary;
-                    var rows = [];                   
+                if(chrome.extension.getBackgroundPage().count){
+                    var html = [];                
+                    var rows = [];
                     for(var i = 0; i < fields.length; i++){
-                        rows.push(summary[fields[i]]);
+                        rows.push(chrome.i18n.getMessage(fields[i]));                                                        
                     }
-                    html.push('<tr id="summary"><td>' + chrome.i18n.getMessage('summary') + '</td><td>' + rows.join('</td><td>') + '</td></tr>');
-                }
+                    html.push('<table><thead><th>pool</th><th>' + rows.join('</th><th>')  + '</th></thead><tbody>');                
                 
-                document.getElementById('pools').innerHTML = html.join('') + '</tbody></table>';                
-                document.getElementById('ts').textContent = ts.getHours() + ':' + ts.getMinutes();
+                    for(var p in data){                    
+                        if(data[p].status){ 
+                            html.push('<tr><td>' + pools[p].title + '</td><td>' + data[p].status + '</td></tr>');  
+                        }else {
+                            var rows = [];
+                            for(var i = 0; i < fields.length; i++){
+                                var value = data[p][pools[p].fields[i]] == undefined ? '-' : data[p][pools[p].fields[i]];
+                                rows.push(value);                                                        
+                            }
+                            html.push('<tr><td>' + pools[p].title + '</td><td>' + rows.join('</td><td>') + '</td></tr>');                                       
+                        }
+                    }  
+                
+                    if(chrome.extension.getBackgroundPage().options.summary){
+                        var summary = chrome.extension.getBackgroundPage().summary;
+                        var rows = [];                   
+                        for(var i = 0; i < fields.length; i++){
+                            rows.push(summary[fields[i]]);
+                        }
+                        html.push('<tr id="summary"><td>' + chrome.i18n.getMessage('summary') + '</td><td>' + rows.join('</td><td>') + '</td></tr>');
+                    }
+                
+                    document.getElementById('pools').innerHTML = html.join('') + '</tbody></table>';                
+                    document.getElementById('ts').textContent = ts.getHours() + ':' + ts.getMinutes();
+                }else {
+                    document.getElementById('pools').innerHTML = '<p>You have not set any tokens yet, please go to <a href="options.html" target="_blank">options page</a></p>';
+                }               
             }            
         </script>
         <script>
@@ -79,6 +83,9 @@
             }
             td:nth-child(3){
                 text-align: center;
+            }
+            p {
+                width: 300px;
             }
         </style>
     </head>
