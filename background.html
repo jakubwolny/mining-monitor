@@ -11,17 +11,15 @@
         deepbit: {
             title: "deepbit.net",
             url: "https://deepbit.net/api/",
-            fields: ["confirmed_reward", "hashrate", "workers_formatted", "payout_history"],
+            fields: ["hashrate", "workers_formatted", "confirmed_reward", "payout_history"],
             hydrate: function(data){
                 data.workers_alive = 0;
                 data.workers_all = 0;
-                for (var i in data.workers) {
-                    if (data.workers.hasOwnProperty(i)) {
-                        data.workers_all++;
-                        if(data.workers[i].alive){
-                            data.workers_alive ++;
-                        }
-                    }
+                for (var i in data.workers) {                   
+                    data.workers_all++;
+                    if(data.workers[i].alive){
+                        data.workers_alive ++;
+                    }                   
                 }
                 data.workers_formatted = data.workers_alive + '/' + data.workers_all;
                 return data;
@@ -38,18 +36,25 @@
         btcguild: {
             title: "btcguild.com",
             url: "http://www.btcguild.com/api.php?api_key=",
-            fields: ["hashrate", "confirmed_rewards", "unconfirmed_rewards", "estimated_rewards", "payouts"],
+            fields: ["hashrate", "workers_formatted", "confirmed_rewards", "unconfirmed_rewards", "estimated_rewards", "payouts"],
             hydrate: function(data){             
                 var result = data.user;
                 var hashrate = 0;
+                result.workers_alive = 0;
                 result.workers_all = 0;
-                for (var i in data.workers) {
-                    if (data.workers.hasOwnProperty(i)) {
-                        result.workers_all++;
-                        hashrate += data.workers[i].hash_rate;
-                    }
+                for (var i in data.workers) {                    
+                    result.workers_all++;
+                    hashrate += data.workers[i].hash_rate;
+                    
+                    // 5 minutes delay
+                    if(data.workers[i].last_share != 'never' &&
+                        (new Date("1,1,1970 " + data.workers[i].last_share ).getTime()
+                        - new Date("1,1,1970").getTime())/1000 < 5 * 60){
+                        result.workers_alive++;
+                    }                   
                 }                
-                result.hashrate = hashrate;
+                result.hashrate = hashrate;                
+                result.workers_formatted = result.workers_alive + '/' + result.workers_all;
                 return result;
             }
         },     
@@ -62,6 +67,8 @@
             }
         }
     }
+    
+    
     
     function updateOptions(){
         try {
