@@ -1,6 +1,6 @@
 {
     "name": "Bitcoin Mining Monitor",
-    "version": "0.3.5",
+    "version": "0.3.6",
   
     "description": "__MSG_extension_description__",
     "icons": { 

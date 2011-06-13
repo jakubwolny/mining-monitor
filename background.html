@@ -89,7 +89,8 @@
     var pools = {
         deepbit: {
             title: "deepbit.net",
-            url: "https://deepbit.net/api/",
+            url: "https://deepbit.net/",
+            api: "api/",
             fields: ["payout_history"],
             process: function(){                
                 this.data.workers_alive = 0;
@@ -106,7 +107,8 @@
         },
         slush: {
             title: "mining.bitcoin.cz",
-            url: "http://mining.bitcoin.cz/accounts/profile/json/",
+            url: "http://mining.bitcoin.cz/",
+            api : "accounts/profile/json/",
             fields: [],
             process: function(){                
                 this.data.workers_alive = 0;
@@ -124,7 +126,8 @@
         },
         btcguild: {
             title: "btcguild.com",
-            url: "http://www.btcguild.com/api.php?api_key=",
+            url: "http://www.btcguild.com/",
+            api: "api.php?api_key=",
             fields: ["payouts"],
             fieldsMap: {
                 confirmed_reward: "confirmed_rewards",
@@ -157,7 +160,8 @@
         },     
         btcmine: {
             title: "btcmine.com",
-            url: "http://btcmine.com/api/getstats/",
+            url: "http://btcmine.com/",
+            api: "api/getstats/",
             fields: ["total_bounty", "solved_blocks", "round_shares", "solved_shares", "total_payout"],
             fieldsMap: {
                 confirmed_reward: "confirmed_bounty",
@@ -191,7 +195,7 @@
                 
                     }
             
-                    xhr.open("GET", "http://btcmine.com/api/getminerstats/" + options.btcmine.token, true);
+                    xhr.open("GET", this.url + "api/getminerstats/" + options.btcmine.token, true);
                     xhr.send(null);
                 } catch(e) {
             
@@ -343,7 +347,7 @@
                 handleError();
             }
             
-            xhr.open("GET", pools[pool].url + options[pool].token, true);
+            xhr.open("GET", pools[pool].url + pools[pool].api + options[pool].token, true);
             xhr.send(null);
         } catch(e) {
             handleError();

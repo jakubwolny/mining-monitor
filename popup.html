@@ -27,7 +27,7 @@
                                 var value = data[p][pools[p].fields[i]] == undefined ? '-' : data[p][pools[p].fields[i]];
                                 rows.push(value);                                                        
                             }
-                            html.push('<tr><td>' + pools[p].title + '</td><td>' + rows.join('</td><td>') + '</td></tr>');                                       
+                            html.push('<tr><td><a href="' + pools[p].url + '" target="_blank">' + pools[p].title + '</a></td><td>' + rows.join('</td><td>') + '</td></tr>');                                       
                         }
                     }  
                 
