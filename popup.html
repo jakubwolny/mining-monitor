@@ -20,7 +20,7 @@
                 
                     for(var p in data){                    
                         if(data[p].status){ 
-                            html.push('<tr><td>' + pools[p].title + '</td><td>' + data[p].status + '</td></tr>');  
+                            html.push('<tr><td><a href="' + pools[p].url + '" target="_blank">' + pools[p].title + '</a></td><td>' + data[p].status + '</td></tr>');  
                         }else {
                             var rows = [];
                             for(var i = 0; i < fields.length; i++){
@@ -86,6 +86,13 @@
             }
             p {
                 width: 300px;
+            }
+            a {
+                color: #000;
+                text-decoration: underline;
+            }
+            a:hover {
+                text-decoration: none;
             }
         </style>
     </head>
