@@ -61,21 +61,16 @@ window.onload = function(){
     });
     
     $('#tokens_auto').click(function(){
-        
-        $.get('https://deepbit.net/settings', function(data){
-            $('#deepbit_token').val($(data).find('#middle b:eq(1)').text());
-        });
-        
-        $.get('https://mining.bitcoin.cz/accounts/token-manage/', function(data){
-            $('#slush_token').val($(data).find('#token').val());
-        });
-        
-        $.get('https://www.btcguild.com/my_api.php', function(data){
-            $('#btcguild_token').val($(data).find('.middle b').text());
-        });
-        
-        $.get('https://btcmine.com/user/profile/', function(data){
-            $('#btcmine_token').val($(data).find('#id_auth_token').val());
-        });        
+        for(var p in pools){
+            (function(p){
+                $.get(pools[p].url + pools[p].token_url, function(data){
+                    var element = $(data).find(pools[p].token_selector);
+                    var value = pools[p].token_text ? element.text() : element.val();
+                    if(value){
+                        $('#' + p + '_token').val(value);
+                    }
+                });
+            })(p);
+        }
     });
 }

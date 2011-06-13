@@ -38,6 +38,9 @@
     var pool = {
         title: "",
         url: "",
+        token_url: "settings",
+        token_selector: "",
+        token_text: true,
         summaryfields: ["hashrate", "workers_formatted", "confirmed_reward", "unconfirmed_reward", "estimated_reward"],
         fields: [],
         init: function(){
@@ -91,6 +94,8 @@
             title: "deepbit.net",
             url: "https://deepbit.net/",
             api: "api/",
+            token_url: "settings",
+            token_selector: "#middle b:eq(1)",
             fields: ["payout_history"],
             process: function(){                
                 this.data.workers_alive = 0;
@@ -107,8 +112,11 @@
         },
         slush: {
             title: "mining.bitcoin.cz",
-            url: "http://mining.bitcoin.cz/",
+            url: "https://mining.bitcoin.cz/",
             api : "accounts/profile/json/",
+            token_url: "accounts/token-manage",
+            token_selector: "#token",
+            token_text: false,
             fields: [],
             process: function(){                
                 this.data.workers_alive = 0;
@@ -126,8 +134,10 @@
         },
         btcguild: {
             title: "btcguild.com",
-            url: "http://www.btcguild.com/",
+            url: "https://www.btcguild.com/",
             api: "api.php?api_key=",
+            token_url: "my_api.php",
+            token_selector: ".middle b",
             fields: ["payouts"],
             fieldsMap: {
                 confirmed_reward: "confirmed_rewards",
@@ -160,8 +170,11 @@
         },     
         btcmine: {
             title: "btcmine.com",
-            url: "http://btcmine.com/",
+            url: "https://btcmine.com/",
             api: "api/getstats/",
+            token_url: "user/profile",
+            token_selector: "#id_auth_token",
+            token_text: false,
             fields: ["total_bounty", "solved_blocks", "round_shares", "solved_shares", "total_payout"],
             fieldsMap: {
                 confirmed_reward: "confirmed_bounty",
