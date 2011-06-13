@@ -31,8 +31,10 @@ window.onload = function(){
         $('#save').removeClass('saved').val(chrome.i18n.getMessage('save'));
     });
      
-    for(var pool in pools){
-        $('#' + pool + '_token').val(options[pool].token).keyup();    
+    for(var p in pools){
+        $('#tokens').append('<label for="' + p + '_token">' + pools[p].title + '</label><input type="text" name="' + p + '_token" id="' + p + '_token" /><br/>');                        
+        
+        $('#' + p + '_token').val(options[p].token).keyup();        
     }    
     
     $('#summary').attr('checked', options.summary).change();
@@ -56,5 +58,24 @@ window.onload = function(){
         return false;
     }).change(function(){
         $('#save').removeClass('saved').val(chrome.i18n.getMessage('save'));
+    });
+    
+    $('#tokens_auto').click(function(){
+        
+        $.get('https://deepbit.net/settings', function(data){
+            $('#deepbit_token').val($(data).find('#middle b:eq(1)').text());
+        });
+        
+        $.get('https://mining.bitcoin.cz/accounts/token-manage/', function(data){
+            $('#slush_token').val($(data).find('#token').val());
+        });
+        
+        $.get('https://www.btcguild.com/my_api.php', function(data){
+            $('#btcguild_token').val($(data).find('.middle b').text());
+        });
+        
+        $.get('https://btcmine.com/user/profile/', function(data){
+            $('#btcmine_token').val($(data).find('#id_auth_token').val());
+        });        
     });
 }

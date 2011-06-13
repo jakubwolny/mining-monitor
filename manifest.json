@@ -1,6 +1,6 @@
 {
     "name": "Bitcoin Mining Monitor",
-    "version": "0.3.6",
+    "version": "0.3.8",
   
     "description": "__MSG_extension_description__",
     "icons": { 
@@ -18,9 +18,9 @@
     "options_page": "options.html",
     "permissions": [ 
     "notifications", 
-    "https://deepbit.net/",
+    "*://deepbit.net/",
     "*://mining.bitcoin.cz/", 
-    "http://www.btcguild.com/",
-    "http://btcmine.com/"
+    "*://www.btcguild.com/",
+    "*://btcmine.com/"
     ]
 }
