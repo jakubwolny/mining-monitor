@@ -67,5 +67,11 @@
     },
     "summary_label": {
         "message": "Show summary"
-    }    
+    },
+    "tokens_auto": {
+        "message": "Get!"
+    },
+    "tokens_auto_description": {
+        "message": "Get tokens if you are logged in"
+    }  
 }

@@ -9,10 +9,16 @@ var options = $.extend({}, defaults, data);
 
 window.onload = function(){
     $('.lang').text(function(){
-        return chrome.i18n.getMessage($(this).attr('id'));
+        console.log(this.tagName);
+        if(this.tagName != 'INPUT'){
+            return chrome.i18n.getMessage($(this).attr('id'));
+        }
     });
-
-    $('#save').val(chrome.i18n.getMessage('save'));
+    
+    $('input.lang').val(function(){
+        console.log(this);
+        return chrome.i18n.getMessage($(this).attr('id'));
+    });    
     
     $('input[type="text"]').keyup(function(){
         var count = 0;
@@ -32,7 +38,7 @@ window.onload = function(){
     });
      
     for(var p in pools){
-        $('#tokens').append('<label for="' + p + '_token">' + pools[p].title + '</label><input type="text" name="' + p + '_token" id="' + p + '_token" /><br/>');                        
+        $('#tokens').append('<label for="' + p + '_token" id="' + p + '_token_label" class="token">' + pools[p].title + '</label><input type="text" name="' + p + '_token" id="' + p + '_token" /><br/>');                        
         
         $('#' + p + '_token').val(options[p].token).keyup();        
     }    
@@ -62,12 +68,25 @@ window.onload = function(){
     
     $('#tokens_auto').click(function(){
         for(var p in pools){
+            $('#' + p + '_token_label').removeClass('ok error').addClass('loading');
             (function(p){
-                $.get(pools[p].url + pools[p].token_url, function(data){
-                    var element = $(data).find(pools[p].token_selector);
-                    var value = pools[p].token_text ? element.text() : element.val();
-                    if(value){
-                        $('#' + p + '_token').val(value);
+                $.ajax({
+                    url: pools[p].url + pools[p].token_url,
+                    success: function(data){
+                        var element = $(data).find(pools[p].token_selector);
+                        var value = pools[p].token_text ? element.text() : element.val();
+                        if(value){
+                            $('#' + p + '_token_label').addClass('ok');
+                            $('#' + p + '_token').val(value);
+                        }else {
+                            $('#' + p + '_token_label').addClass('error');
+                        }
+                    },
+                    complete: function(){
+                        $('#' + p + '_token_label').removeClass('loading');
+                    },
+                    error: function(){
+                        $('#' + p + '_token_label').addClass('error');
                     }
                 });
             })(p);

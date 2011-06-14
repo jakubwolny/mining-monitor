@@ -40,8 +40,7 @@ h1{
 }
 legend, #test, #save{
     font-weight: bolder;
-    font-size: 18px;
-    color: #5959ff;
+    font-size: 18px;   
 }
 fieldset{
     padding: 10px 15px 20px 15px;
@@ -83,16 +82,27 @@ input.format {
 div.help-box {
     display: none;
 }
-#save {
-    float: right;
-    width: 130px;
+.button {
     height: 40px;
     background: #5959ff;
     color: #fff;
     border: none;
-    margin: 20px 2px 0 0;
+    display: block;
+    margin: 10px 2px 0 0;
+    font-weight: bolder;
+    font-size: 18px;  
+    text-align: center;
 }
-#save:hover{
+a.button {
+    padding-top: 5px;
+    height: 35px;
+}
+#save {
+    float: right;
+    width: 130px;
+    margin-top: 20px;
+}
+.button:hover{
     background: #000;
     cursor: pointer;
 }
@@ -134,4 +144,35 @@ div.help-box {
     font-weight: bold;
     padding-left: 35px;
     cursor: default;
+}
+
+.token {
+    background-position: right center; 
+    background-repeat: no-repeat;
+    width: 160px;
+    display: inline-block;
+}
+
+.token.loading {
+    background-image: url(../img/loading.gif);
+}
+
+.token.ok {
+    background-image: url(../img/ok.png);
+}
+
+.token.error {
+    background-image: url(../img/error.png);
+}
+
+
+#tokens_auto {
+    float: right;
+    width: 130px;
+}
+
+#tokens_auto_description {
+    float: left;
+    font-weight: bolder;
+    padding-top: 18px;
 }

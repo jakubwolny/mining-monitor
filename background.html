@@ -72,12 +72,35 @@
             summary.count++;
             
             if(summary.count == count){
-                console.log(summary[options.badge].toString());
+                var text = '';            
+                if(options.badge == 'hashrate'){
+                    // 12      => 12
+                    // 1234    => 1234
+                    // 123.    => 123
+                    // 12345   => 12K
+                    // 123456  => 123K
+                    // 1234567 => 1.2M
+                    
+                    if(summary.hashrate >= 1000000){
+                        text = (summary.hashrate / 1000000).toString().slice(0, 3).replace(/\.$/, '') + 'M';
+                    }else if(summary.hashrate >= 10000){
+                        text = parseInt(summary.hashrate / 1000).toString() + 'K';
+                    } else {
+                        text = summary.hashrate.toString().slice(0, 4).replace(/\.$/, '');
+                    }                    
+                }else if(options.badge == 'confirmed_reward'){
+                    // remove dot from the end - this format supports up to 9999 BTC                    
+                    text = summary[options.badge].toString().slice(0, 4).replace(/\.$/, '');
+                }else {
+                    text = summary[options.badge].toString().slice(0, 4);
+                }              
+                
                 chrome.browserAction.setBadgeBackgroundColor({
                     color: [0, 255, 0, 255]
-                });            
+                });
+                
                 chrome.browserAction.setBadgeText({
-                    text: summary[options.badge].toString().slice(0, 4)
+                    text: text
                 }); 
                 var popup = chrome.extension.getViews({
                     type: 'popup'
