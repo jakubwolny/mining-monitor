@@ -20,14 +20,14 @@
                 
                     for(var p in data){                    
                         if(data[p].status){ 
-                            html.push('<tr><td><a href="' + pools[p].url + '" target="_blank">' + pools[p].title + '</a></td><td>' + data[p].status + '</td></tr>');  
+                            html.push('<tr><td><a href="' + pools[p].url + pools[p].account_url + '" target="_blank">' + pools[p].title + '</a></td><td>' + data[p].status + '</td></tr>');  
                         }else {
                             var rows = [];
                             for(var i = 0; i < fields.length; i++){
                                 var value = data[p][pools[p].fields[i]] == undefined ? '-' : data[p][pools[p].fields[i]];
                                 rows.push(value);                                                        
                             }
-                            html.push('<tr><td><a href="' + pools[p].url + '" target="_blank">' + pools[p].title + '</a></td><td>' + rows.join('</td><td>') + '</td></tr>');                                       
+                            html.push('<tr><td><a href="' + pools[p].url + pools[p].account_url + '" target="_blank">' + pools[p].title + '</a></td><td>' + rows.join('</td><td>') + '</td></tr>');                                       
                         }
                     }  
                 
@@ -40,8 +40,8 @@
                         html.push('<tr id="summary"><td>' + chrome.i18n.getMessage('summary') + '</td><td>' + rows.join('</td><td>') + '</td></tr>');
                     }
                 
-                    document.getElementById('pools').innerHTML = html.join('') + '</tbody></table>';                
-                    document.getElementById('ts').textContent = ts.getHours() + ':' + ts.getMinutes();
+                    document.getElementById('pools').innerHTML = html.join('') + '</tbody></table>';                   
+                    document.getElementById('ts').textContent = ts.getHours() + ':' + (ts.getMinutes() < 10 ? '0' : '') + ts.getMinutes();
                 }else {
                     document.getElementById('pools').innerHTML = '<p>You have not set any tokens yet, please go to <a href="options.html" target="_blank">options page</a></p>';
                 }               
@@ -59,6 +59,10 @@
             })();
         </script>
         <style>
+            body {
+                font-family: sans-serif;
+                font-size: 12px;
+            }
             h3 {
                 margin-bottom: 5px;
             }
@@ -71,6 +75,9 @@
             }
             table {
                 width: 300px;
+            }
+            td, th {
+                padding: 2px 3px;
             }
             tr:nth-child(even){
                 background: #e6e6e6;
