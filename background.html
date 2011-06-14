@@ -26,15 +26,6 @@
         badge: 'hashrate'
     };
     
-    function add(){
-        var result = 0;
-        var dp = 100000000; // decimal point for safety adding
-        for(var i = 0; i < arguments.length; i++){
-            result += parseInt(arguments[i] * dp, 10);
-        }
-        return result / dp;
-    }
-    
     var pool = {
         title: "",
         url: "",
@@ -56,22 +47,33 @@
             this.data.hashrate = parseInt(this.data.hashrate, 10);            
             if(this.data.workers_all){
                 this.data.workers_formatted = this.data.workers_alive + '/' + this.data.workers_all;    
-            }            
-            this.data.confirmed_reward = parseFloat(this.data.confirmed_reward);
-            this.data.unconfirmed_reward = parseFloat(this.data.unconfirmed_reward);
-            this.data.estimated_reward = parseFloat(this.data.estimated_reward);
+            }
+            //            this.data.confirmed_reward = parseFloat(this.data.confirmed_reward);
+            //            this.data.unconfirmed_reward = parseFloat(this.data.unconfirmed_reward);
+            //            this.data.estimated_reward = parseFloat(this.data.estimated_reward);
             
             summary.workers_all += this.data.workers_all;
             summary.workers_alive += this.data.workers_alive;
             summary.workers_formatted = summary.workers_alive + '/' + summary.workers_all;
             summary.hashrate += this.data.hashrate;          
             console.log(this.title, this.data.hashrate, summary.hashrate);
-            summary.confirmed_reward = add(summary.confirmed_reward, this.data.confirmed_reward);
-            summary.unconfirmed_reward = add(summary.unconfirmed_reward, this.data.unconfirmed_reward);
-            summary.estimated_reward = add(summary.estimated_reward, this.data.estimated_reward);
+            
+            summary.confirmed_reward = summary.confirmed_reward + parseInt(this.data.confirmed_reward.toString().replace('.', ''), 10);
+            summary.unconfirmed_reward = summary.unconfirmed_reward + parseInt(this.data.unconfirmed_reward.toString().replace('.', ''), 10);
+            summary.estimated_reward = summary.estimated_reward + parseInt(this.data.estimated_reward.toString().replace('.', ''), 10);
+            
             summary.count++;
             
             if(summary.count == count){
+                
+                ["confirmed_reward", "unconfirmed_reward", "estimated_reward"].forEach(function(i){
+                    var s =  summary[i].toString();
+                    if(s.length < 9){
+                        s = "000000000".slice(0, 9 - s.length) + s;
+                    }
+                    summary[i] = s.slice(0, s.length - 8) + "." + s.slice(-8);
+                });
+
                 var text = '';            
                 if(options.badge == 'hashrate'){
                     // 12      => 12
@@ -136,7 +138,7 @@
         },
         slush: {
             title: "mining.bitcoin.cz",
-            url: "https://mining.bitcoin.cz/",
+            url: "http://mining.bitcoin.cz/",
             api : "accounts/profile/json/",
             account_url: "accounts/profile",
             token_url: "accounts/token-manage",

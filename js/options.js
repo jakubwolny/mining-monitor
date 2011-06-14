@@ -8,15 +8,13 @@ var pools = chrome.extension.getBackgroundPage().pools;
 var options = $.extend({}, defaults, data);
 
 window.onload = function(){
-    $('.lang').text(function(){
-        console.log(this.tagName);
+    $('.lang').text(function(){       
         if(this.tagName != 'INPUT'){
             return chrome.i18n.getMessage($(this).attr('id'));
         }
     });
     
-    $('input.lang').val(function(){
-        console.log(this);
+    $('input.lang').val(function(){        
         return chrome.i18n.getMessage($(this).attr('id'));
     });    
     
@@ -74,7 +72,7 @@ window.onload = function(){
                     url: pools[p].url + pools[p].token_url,
                     success: function(data){
                         var element = $(data).find(pools[p].token_selector);
-                        var value = pools[p].token_text ? element.text() : element.val();
+                        var value = pools[p].token_text ? element.text() : element.val();                        
                         if(value){
                             $('#' + p + '_token_label').addClass('ok');
                             $('#' + p + '_token').val(value);
@@ -85,7 +83,7 @@ window.onload = function(){
                     complete: function(){
                         $('#' + p + '_token_label').removeClass('loading');
                     },
-                    error: function(){
+                    error: function(){                     
                         $('#' + p + '_token_label').addClass('error');
                     }
                 });
