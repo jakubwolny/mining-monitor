@@ -1,3 +1,4 @@
+<script src="js/btc.js"></script>
 <script>
     var pollIntervalMin = 1000 * 60; 
     var pollIntervalMax = 1000 * 60 * 10;  
@@ -48,35 +49,21 @@
             if(this.data.workers_all){
                 this.data.workers_formatted = this.data.workers_alive + '/' + this.data.workers_all;    
             }
-            //            this.data.confirmed_reward = parseFloat(this.data.confirmed_reward);
-            //            this.data.unconfirmed_reward = parseFloat(this.data.unconfirmed_reward);
-            //            this.data.estimated_reward = parseFloat(this.data.estimated_reward);
-            
+                     
             summary.workers_all += this.data.workers_all;
             summary.workers_alive += this.data.workers_alive;
             summary.workers_formatted = summary.workers_alive + '/' + summary.workers_all;
             summary.hashrate += this.data.hashrate;          
             
             ["confirmed_reward", "unconfirmed_reward", "estimated_reward"].forEach(function(i){
-                var s = this.data[i].toString();
-                var d = s.indexOf(".");
-                var number = s.slice(0, d) + s.slice(d + 1) + "00000000".slice(s.length - d - 1);
-                this.data[i] = number.slice(0, number.length - 8) + "." + number.slice(-8);
-                summary[i] = summary[i] + parseInt(number, 10);                
+                this.data[i] = new Btc(this.data[i]);              
+                summary[i] = summary[i].add(this.data[i]);                
             }, this);
            
             summary.count++;
             
             if(summary.count == count){
                 
-                ["confirmed_reward", "unconfirmed_reward", "estimated_reward"].forEach(function(i){
-                    var s =  summary[i].toString();
-                    if(s.length < 9){
-                        s = "000000000".slice(0, 9 - s.length) + s;
-                    }
-                    summary[i] = s.slice(0, s.length - 8) + "." + s.slice(-8);
-                });
-
                 var text = '';            
                 if(options.badge == 'hashrate'){
                     // 12      => 12
@@ -302,9 +289,9 @@
             hashrate: 0,
             workers_all: 0,
             workers_alive: 0,            
-            confirmed_reward: 0,
-            unconfirmed_reward: 0,
-            estimated_reward: 0,
+            confirmed_reward: new Btc(),
+            unconfirmed_reward: new Btc(),
+            estimated_reward: new Btc(),
             count: 0
         };
         
