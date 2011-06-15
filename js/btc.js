@@ -5,7 +5,7 @@ function Btc(value, radix) {
     var d = s.indexOf(this.radix);    
     
     this.integer = d == -1 ? s : s.slice(0, d);
-    this.fractional =  s.slice(d + 1);
+    this.fractional =  s.slice(d + 1) + "00000000".slice(s.length - d - 1);
     
     this.integer = parseInt(this.integer);
     this.fractional = parseInt(this.fractional);
@@ -14,13 +14,13 @@ function Btc(value, radix) {
 }
     
 Btc.prototype.toString = function () {
-
-    return this.integer + this.radix + this.fractional + "00000000".slice(this.fractional.toString().length);
+    return this.integer + this.radix + "00000000".slice(this.fractional.toString().length) + this.fractional;
 }
 
 Btc.prototype.add = function (btc) {
     var fractional = this.fractional + btc.fractional;
     var integer = this.integer + btc.integer;
+    
     if(fractional >= this.precision){        
         integer += parseInt(fractional / this.precision);
         fractional = fractional % this.precision;
