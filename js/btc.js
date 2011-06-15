@@ -7,8 +7,8 @@ function Btc(value, radix) {
     this.integer = d == -1 ? s : s.slice(0, d);
     this.fractional =  s.slice(d + 1) + "00000000".slice(s.length - d - 1);
     
-    this.integer = parseInt(this.integer);
-    this.fractional = parseInt(this.fractional);
+    this.integer = parseInt(this.integer, 10);
+    this.fractional = parseInt(this.fractional, 10);
     
     this.precision = 100000000;
 }
