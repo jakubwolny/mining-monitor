@@ -56,12 +56,15 @@
             summary.workers_alive += this.data.workers_alive;
             summary.workers_formatted = summary.workers_alive + '/' + summary.workers_all;
             summary.hashrate += this.data.hashrate;          
-            console.log(this.title, this.data.hashrate, summary.hashrate);
             
-            summary.confirmed_reward = summary.confirmed_reward + parseInt(this.data.confirmed_reward.toString().replace('.', ''), 10);
-            summary.unconfirmed_reward = summary.unconfirmed_reward + parseInt(this.data.unconfirmed_reward.toString().replace('.', ''), 10);
-            summary.estimated_reward = summary.estimated_reward + parseInt(this.data.estimated_reward.toString().replace('.', ''), 10);
-            
+            ["confirmed_reward", "unconfirmed_reward", "estimated_reward"].forEach(function(i){
+                var s = this.data[i].toString();
+                var d = s.indexOf(".");
+                var number = s.slice(0, d) + s.slice(d + 1) + "00000000".slice(s.length - d - 1);
+                this.data[i] = number.slice(0, number.length - 8) + "." + number.slice(-8);
+                summary[i] = summary[i] + parseInt(number, 10);                
+            }, this);
+           
             summary.count++;
             
             if(summary.count == count){
