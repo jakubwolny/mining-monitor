@@ -1,11 +1,13 @@
 <script src="js/btc.js"></script>
 <script>
-    var pollIntervalMin = 1000 * 60; 
+    var pollIntervalMin = 1000 * 60 * 2; 
     var pollIntervalMax = 1000 * 60 * 10;  
+    var chartsInterval = 1000 * 60 * 15;
     var requestFailureCount = 0;  // used for exponential backoff
     var requestTimeout = 1000 * 60;
     var options = {};
     var data = {}; // current data
+    var prices = [];
     var ts; // timestamp
     var scheduled = false;
     var summary = {};
@@ -24,7 +26,8 @@
             token: ''
         },
         summary: true,
-        badge: 'hashrate'
+        badge: 'hashrate',
+        convert: true
     };
     
     var pool = {
@@ -176,7 +179,11 @@
                     result.workers_all++;
                     result.hashrate += this.data.workers[i].hash_rate;
                     
-                    // 5 minutes delay
+                    console.log(this.data.workers[i].last_share,
+                    (new Date("1,1,1970 " + this.data.workers[i].last_share ).getTime()
+                        - new Date("1,1,1970").getTime())/1000 < 5 * 60);
+                    
+                    // 5 minutes delay                    
                     if(this.data.workers[i].last_share != 'never' &&
                         (new Date("1,1,1970 " + this.data.workers[i].last_share ).getTime()
                         - new Date("1,1,1970").getTime())/1000 < 5 * 60){
@@ -247,6 +254,10 @@
     }    
     
     
+    function timeToSeconds(){
+    
+    }
+    
     function updateOptions(){
         try {
             options = JSON.parse(localStorage.options);
@@ -254,7 +265,7 @@
         }    
         count = 0;
         for(var pool in pools){
-            if(options[pool].token){
+            if(options[pool] && options[pool].token){
                 count++;
             }
         }
@@ -386,12 +397,64 @@
         }
     }
     
-    chrome.browserAction.onClicked.addListener(function(tab) {
-        startRequest();
-    });
+    
+    function getMarkets(){
+   
+        var xhr = new XMLHttpRequest(); 
+        var abortTimerId = window.setTimeout(function() {
+            xhr.abort();  // synchronously calls onreadystatechange
+        }, requestTimeout);       
+       
+        function handleError(){
+            window.clearTimeout(abortTimerId);
+            window.setTimeout(getMarkets, chartsInterval); 
+        }
+        function handleSuccess(data){
+            window.clearTimeout(abortTimerId);
+            window.setTimeout(getMarkets, chartsInterval); 
+            prices = data;
+            
+            //            for(var i = 0; i < data.length; i++){
+            //                markets[i] = data[i];
+            //            }
+        }
+        try {
+            xhr.onreadystatechange = function(){
+                if (xhr.readyState != 4){
+                    return;
+                }
+                if(xhr.status != 200){
+                    handleError();
+                    return;
+                }
+                if(xhr.responseText != ""){
+                    handleSuccess(JSON.parse(xhr.responseText));    
+                }                
+            }
+
+            xhr.onerror = function(error) {
+                handleError();
+            }
+            
+            xhr.open("GET", "http://bitcoincharts.com/t/weighted_prices.json", true);
+            xhr.send(null);
+        } catch(e) {
+            handleError();
+        }
+    }
+    
+    //    
+    //    chrome.browserAction.onClicked.addListener(function(tab) {
+    //        startRequest();
+    //    });
     
     updateOptions();
     startRequest();
+    
+    if(options.convert){       
+        getMarkets();
+    }
+    
 
 </script>
 <script>

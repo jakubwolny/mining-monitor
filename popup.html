@@ -4,13 +4,14 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <title>Bitcoin Mining Monitor</title>
         <script>            
-            window.onload = function(){                
-                var pools = chrome.extension.getBackgroundPage().pools; 
-                var data = chrome.extension.getBackgroundPage().data; 
-                var fields = chrome.extension.getBackgroundPage().pool.summaryfields;
-                var ts = chrome.extension.getBackgroundPage().ts;
+            window.onload = function(){
+                var background =  chrome.extension.getBackgroundPage();
+                var pools = background.pools; 
+                var data = background.data; 
+                var fields = background.pool.summaryfields;
+                var ts = background.ts;
                 
-                if(chrome.extension.getBackgroundPage().count){
+                if(background.count){
                     var html = [];                
                     var rows = [];
                     for(var i = 0; i < fields.length; i++){
@@ -31,20 +32,48 @@
                         }
                     }  
                 
-                    if(chrome.extension.getBackgroundPage().options.summary){
-                        var summary = chrome.extension.getBackgroundPage().summary;
-                        var rows = [];                   
-                        for(var i = 0; i < fields.length; i++){
-                            rows.push(summary[fields[i]]);
-                        }
-                        html.push('<tr id="summary"><td>' + chrome.i18n.getMessage('summary') + '</td><td>' + rows.join('</td><td>') + '</td></tr>');
+                    var summary = chrome.extension.getBackgroundPage().summary;
+                    var rows = [];                   
+                    for(var i = 0; i < fields.length; i++){
+                        rows.push(summary[fields[i]]);
                     }
+                    html.push('<tr id="summary"><td>' + chrome.i18n.getMessage('summary') + '</td><td>' + rows.join('</td><td>') + '</td></tr>');
+                    
+                    if(background.options.convert){
+                        console.log(background.prices);
+                        var o = [];                    
+                        for(var i in background.prices){
+                            o.push('<option value="' + i +'">' + i + '</option>');
+                        }                      
+                        html.push('<tr id="convert_row"><td><select id="convert">' + o.join('') + '</select></td><td></td><td></td><td></td><td></td><td></td></tr>');
+                    }      
                 
                     document.getElementById('pools').innerHTML = html.join('') + '</tbody></table>';                   
                     document.getElementById('ts').textContent = ts.getHours() + ':' + (ts.getMinutes() < 10 ? '0' : '') + ts.getMinutes();
                 }else {
                     document.getElementById('pools').innerHTML = '<p>You have not set any tokens yet, please go to <a href="options.html" target="_blank">options page</a></p>';
-                }               
+                }
+                
+                if(background.options.convert){
+                    var change = function(){
+                        var value = document.getElementById('convert').value;                        
+                        localStorage['convert_symbol'] = value;
+                        var summary = document.getElementById('summary').getElementsByTagName('td');
+                        var convert = document.getElementById('convert_row').getElementsByTagName('td');
+                        
+                        [3, 4, 5].forEach(function(i){
+                            var price = background.prices[value]['24h'] === undefined ? 
+                                (background.prices[value]['7d'] === undefined ? 
+                                background.prices[value]['30d'] :
+                                background.prices[value]['7d']) : 
+                                background.prices[value]['24h'];
+                            convert[i].textContent = (price * parseFloat(summary[i].textContent)).toFixed(2)
+                        });
+                    };
+                    document.getElementById('convert').addEventListener('change', change);
+                    document.querySelector('#convert option[value=' + (localStorage['convert_symbol'] === undefined ? 'USD' : localStorage['convert_symbol'])  + ']').selected = 'selected';
+                    change();
+                }
             }            
         </script>
         <script>
@@ -109,7 +138,7 @@
     <body>
         <div id="pools">
 
-        </div>
-        <p>Auto updates every 5 mins - Updated: <span id="ts"></span></p>
+        </div>       
+        <p>Auto updates every 5 mins - Updated: <span id="ts"></span><br/> Markets info from <a href="http://bitcoincharts.com" target="_blank">Bitcoincharts</a> - weighted prices from last 24 hours</p>
     </body> 
 </html>

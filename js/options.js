@@ -26,12 +26,6 @@ window.onload = function(){
             }
         }
         
-        if(count > 1){
-            $('#summary').attr('disabled', false);
-        }else{
-            $('#summary').attr('disabled', true);
-        }
-        
         $('#save').removeClass('saved').val(chrome.i18n.getMessage('save'));
     });
      
@@ -41,12 +35,12 @@ window.onload = function(){
         $('#' + p + '_token').val(options[p].token).keyup();        
     }    
     
-    $('#summary').attr('checked', options.summary).change();
+    $('#convert').attr('checked', options.convert).change();
     $('input[name="badge"]').val([options.badge]);
 
     $('form').submit(function(){
         var data = {           
-            summary: $('#summary').is(':checked'),
+            convert: $('#convert').is(':checked'),
             badge: $('input[name="badge"]:checked').val()
         }
         for(var pool in pools){
