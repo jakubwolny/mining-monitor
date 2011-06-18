@@ -25,6 +25,9 @@
         btcmine: {
             token: ''
         },
+        bitclockers: {
+            token: ''
+        },
         summary: true,
         badge: 'hashrate',
         convert: true
@@ -36,6 +39,9 @@
         token_url: "settings",
         token_selector: "",
         token_text: true,
+        token_process: function(text){
+            return text;
+        },
         summaryfields: ["hashrate", "workers_formatted", "confirmed_reward", "unconfirmed_reward", "estimated_reward"],
         fields: [],
         init: function(){
@@ -239,6 +245,33 @@
                 } catch(e) {
             
                 }
+            }
+        },
+        bitclockers: {
+            title: "bitclockers.com",
+            url: "https://bitclockers.com/",
+            api: "api/",
+            account_url: "dashboard",
+            token_url: "dashboard",
+            token_selector: "h3",
+            token_process: function(text){
+                return text.slice(text.indexOf("Change")-32, text.indexOf("Change"));               
+            },        
+            fields: ["total_bounty", "solved_blocks", "round_shares", "solved_shares", "total_payout"],
+            fieldsMap: {
+                confirmed_reward: "dashboard"               
+            },
+            process: function(){
+                this.data.workers_alive = 0;
+                this.data.workers_all = 0;                
+                for (var i in this.data.workers) {                   
+                    this.data.workers_all++;
+                    if(this.data.workers[i].active){
+                        this.data.workers_alive ++;
+                    }  
+                }
+                this.data.unconfirmed_reward = "0.0";
+                this.data.estimated_reward = "0.0";
             }
         }
     }

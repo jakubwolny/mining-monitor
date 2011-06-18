@@ -66,10 +66,10 @@ window.onload = function(){
                     url: pools[p].url + pools[p].token_url,
                     success: function(data){
                         var element = $(data).find(pools[p].token_selector);
-                        var value = pools[p].token_text ? element.text() : element.val();                        
-                        if(value){
+                        var value = pools[p].token_text ? element.text() : element.val(); 
+                        if(value){                         
                             $('#' + p + '_token_label').addClass('ok');
-                            $('#' + p + '_token').val(value);
+                            $('#' + p + '_token').val(pools[p].token_process(value));
                         }else {
                             $('#' + p + '_token_label').addClass('error');
                         }
