@@ -26,9 +26,6 @@
     "workers_formatted": {
         "message": "Workers"
     },
-    "payout_history": {
-        "message": "Payout"
-    },
     "estimated_reward": {
         "message": "Estimated"
     },
@@ -44,10 +41,7 @@
     "wallet": {
         "message": "Wallet"
     },
-    "payouts": {
-        "message": "Payout"
-    },
-    "total_payout": {
+    "payout": {
         "message": "Payout"
     },
     "total_bounty": {

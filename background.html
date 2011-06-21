@@ -47,7 +47,7 @@
         token_process: function(text){
             return text;
         },
-        summaryfields: ["hashrate", "workers_formatted", "confirmed_reward", "unconfirmed_reward", "estimated_reward"],
+        summaryfields: ["hashrate", "workers_formatted", "confirmed_reward", "unconfirmed_reward", "estimated_reward", "payout"],
         fields: [],
         init: function(){
             this.fields = this.summaryfields.concat(this.fields);
@@ -67,9 +67,9 @@
             summary.workers_all += this.data.workers_all;
             summary.workers_alive += this.data.workers_alive;
             summary.workers_formatted = summary.workers_alive + '/' + summary.workers_all;
-            summary.hashrate += this.data.hashrate;          
-            
-            ["confirmed_reward", "unconfirmed_reward", "estimated_reward"].forEach(function(i){
+            summary.hashrate += this.data.hashrate;  
+
+            ["confirmed_reward", "unconfirmed_reward", "estimated_reward", "payout"].forEach(function(i){
                 this.data[i] = new Btc(this.data[i]);              
                 summary[i] = summary[i].add(this.data[i]);                
             }, this);
@@ -126,7 +126,9 @@
             account_url: "account",     
             token_url: "settings",                  
             token_selector: "#middle b:eq(1)",
-            fields: ["payout_history"],
+            fieldsMap: {
+                payout: "payout_history"
+            },
             process: function(){                
                 this.data.workers_alive = 0;
                 this.data.workers_all = 0;                
@@ -151,7 +153,8 @@
                 return element.val();
             },
             fields: [],
-            process: function(){                
+            process: function(){
+                this.data.payout = 0;
                 this.data.workers_alive = 0;
                 this.data.workers_all = 0;
                 this.data.hashrate = 0;                
@@ -176,7 +179,8 @@
             fieldsMap: {
                 confirmed_reward: "confirmed_rewards",
                 unconfirmed_reward: "unconfirmed_rewards",
-                estimated_reward: "estimated_rewards"
+                estimated_reward: "estimated_rewards",
+                payout: "payouts"
             },
             preprocess: function(){
                 for(var field in this.fieldsMap){
@@ -220,7 +224,8 @@
             fieldsMap: {
                 confirmed_reward: "confirmed_bounty",
                 unconfirmed_reward: "unconfirmed_bounty",
-                estimated_reward: "estimated_bounty"
+                estimated_reward: "estimated_bounty",
+                payout: "total_payout"
             },
             process: function(){
                 var xhr = new XMLHttpRequest(); 
@@ -371,7 +376,8 @@
             confirmed_reward: new Btc(),
             unconfirmed_reward: new Btc(),
             estimated_reward: new Btc(),
-            count: 0
+            count: 0,
+            payout: new Btc()
         };
         
         ts = new Date();
