@@ -301,6 +301,9 @@
                 this.data.workers_alive = 0;
                 for (var i in this.data.workers) {
                     this.data.workers_all++;
+                    if(this.data.workers[i].hashrate){
+                        this.data.workers_alive ++;
+                    }
                 }
                 this.data.unconfirmed_reward = "0.0";
                 this.data.estimated_reward = "0.0";
