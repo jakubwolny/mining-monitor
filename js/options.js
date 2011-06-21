@@ -62,14 +62,15 @@ window.onload = function(){
         for(var p in pools){
             $('#' + p + '_token_label').removeClass('ok error').addClass('loading');
             (function(p){
-                $.ajax({
+                console.log(pools[p].url + pools[p].token_url);
+                $.ajax({                    
                     url: pools[p].url + pools[p].token_url,
                     success: function(data){
-                        var element = $(data).find(pools[p].token_selector);
-                        var value = pools[p].token_text ? element.text() : element.val(); 
+                        var element = $(data).find(pools[p].token_selector);                       
+                        var value = pools[p].token_getter(element); 
                         if(value){                         
                             $('#' + p + '_token_label').addClass('ok');
-                            $('#' + p + '_token').val(pools[p].token_process(value));
+                            $('#' + p + '_token').val(value);
                         }else {
                             $('#' + p + '_token_label').addClass('error');
                         }
