@@ -66,7 +66,7 @@ window.onload = function(){
                 $.ajax({                    
                     url: pools[p].url + pools[p].token_url,
                     success: function(data){
-                        var element = $(data).find(pools[p].token_selector);                       
+                        var element = $(data).find(pools[p].token_selector);
                         var value = pools[p].token_getter(element); 
                         if(value){                         
                             $('#' + p + '_token_label').addClass('ok');
