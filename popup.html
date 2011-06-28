@@ -3,14 +3,14 @@
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <title>Bitcoin Mining Monitor</title>
-        <script>            
-            window.onload = function(){
-                var background =  chrome.extension.getBackgroundPage();
-                var pools = background.pools; 
-                var data = background.data; 
-                var fields = background.pool.summaryfields;
-                var ts = background.ts;
-                
+        <script> 
+            var background =  chrome.extension.getBackgroundPage();
+            var pools = background.pools; 
+            var data = background.data; 
+            var fields = background.pool.summaryfields;
+            var ts = background.ts;
+            
+            function draw(){
                 if(background.count){
                     var html = [];                
                     var rows = [];
@@ -74,7 +74,9 @@
                     document.querySelector('#convert option[value=' + (localStorage['convert_symbol'] === undefined ? 'USD' : localStorage['convert_symbol'])  + ']').selected = 'selected';
                     change();
                 }
-            }            
+            }
+            
+            window.onload = draw;   
         </script>
         <script>
             var _gaq = _gaq || [];
