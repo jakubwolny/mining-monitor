@@ -22,31 +22,7 @@
         count: 0,
         payout: new Btc()
     };
-    var defaults = {
-        deepbit: {
-            token: ''
-        },
-        slush: {
-            token: ''
-        },
-        btcguild: {
-            token: ''
-        },
-        btcmine: {
-            token: ''
-        },
-        bitclockers: {
-            token: ''
-        },
-        polmine: {
-            token: ''
-        },   
-        simplecoin: {
-            token: ''
-        },   
-        oczoin: {
-            token: ''
-        },   
+    var defaults = {        
         summary: true,
         badge: 'hashrate',
         convert: true
@@ -167,7 +143,7 @@
             api: "api/",
             account_url: "account",     
             token_url: "settings",                  
-            token_selector: "#middle b:eq(1)",
+            token_selector: "#middle>div>b",
             fieldsMap: {
                 payout: "payout_history"
             },
@@ -374,7 +350,7 @@
                 this.data.unconfirmed_reward = 0;               
             }
         },
-	ozcoin: {
+        ozcoin: {
             title: "ozco.in",
             url: "https://ozco.in/",
             api: "api.php?api_key=",
@@ -407,20 +383,18 @@
             api: "api/user/key/",
             account_url: "user/profile.html",
             token_url: "user/profile.html",
-            token_selector: "table:eq(0) tr:eq(2) td:eq(1)",
+            token_selector: "table.dataGrid tr:eq(6) td",
             fieldsMap: {
                 confirmed_reward: "confirmed_rewards",
                 payout: "payout_history"
-            },
-            token_getter: function(element){                
-                return element[1] != undefined ? element[1].textContent : '';
-            },
+            },            
             process: function(){
                 this.data.workers_alive = 0;
-                this.data.workers_all = 0;                
-                for (var i in this.data.workers) {                   
+                this.data.workers_all = 0;
+                console.log(this.data.workers);
+                for (var i in this.data.workers) {
                     this.data.workers_all++;                    
-                    if(this.data.workers[i].alive != 0){                        
+                    if(this.data.workers[i].mhash > 0){                        
                         this.data.workers_alive ++;
                     }
                 }
@@ -452,6 +426,9 @@
         }    
         count = 0;
         for(var pool in pools){
+            defaults[pool] = {
+                token: ''
+            };
             if(options[pool] && options[pool].token){
                 count++;
             }
