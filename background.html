@@ -401,6 +401,32 @@
                 this.data.unconfirmed_reward = 0;
                 this.data.estimated_reward = 0;
             }
+        },
+        arsbitcoin: {
+            title: "arsbitcoin.com",
+            url: "https://arsbitcoin.com/",
+            api: "api.php?api_key=",
+            account_url: "accountdetails.php",
+            token_url: "accountdetails.php",
+            token_selector: "#api_key",
+            fieldsMap: {
+                confirmed_reward: "confirmed_rewards",
+                payout: "payout_history",
+                workers_formatted: "workers"
+            },
+            process: function(){
+                this.data.workers_alive = 0;
+                this.data.workers_all = 0;
+                console.log(this.data.workers);
+                for (var i in this.data.workers) {
+                    this.data.workers_all++;
+                    if(this.data.workers[i].mhash > 0){
+                        this.data.workers_alive ++;
+                    }
+                }
+                this.data.unconfirmed_reward = 0;
+                this.data.estimated_reward = 0;
+            }
         }
     }
     
