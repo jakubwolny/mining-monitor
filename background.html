@@ -67,7 +67,6 @@
                 this.data[i] = new Btc(this.data[i]);              
             }, this);
            
-            //            summary.count++;
             calculateSummary();
         }
     }
@@ -593,15 +592,13 @@
             window.clearTimeout(abortTimerId);
             window.setTimeout(getMarkets, chartsInterval); 
         }
+        
         function handleSuccess(data){
             window.clearTimeout(abortTimerId);
             window.setTimeout(getMarkets, chartsInterval); 
             prices = data;
-            
-            //            for(var i = 0; i < data.length; i++){
-            //                markets[i] = data[i];
-            //            }
         }
+        
         try {
             xhr.onreadystatechange = function(){
                 if (xhr.readyState != 4){
@@ -627,19 +624,12 @@
         }
     }
     
-    //    
-    //    chrome.browserAction.onClicked.addListener(function(tab) {
-    //        startRequest();
-    //    });
-    
     updateOptions();
     startRequest();
     
     if(options.convert){       
         getMarkets();
     }
-    
-
 </script>
 <script>
     var _gaq = _gaq || [];
