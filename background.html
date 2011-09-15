@@ -280,10 +280,9 @@
             api: "api/",
             account_url: "dashboard",
             token_url: "dashboard",
-            token_selector: "h3",
+            token_selector: "h3:eq(4) a",
             token_getter: function(element){
-                var text = element.text();
-                return text.slice(text.indexOf("Change")-32, text.indexOf("Change")); 
+                return element.attr('href') ? element.attr('href').slice(-32) : '';
             },
             fieldsMap: {
                 confirmed_reward: "dashboard"               
