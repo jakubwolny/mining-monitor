@@ -284,8 +284,9 @@
             token_getter: function(element){
                 return element.attr('href') ? element.attr('href').slice(-32) : '';
             },
-            fieldsMap: {
-                confirmed_reward: "dashboard"               
+            fieldsMap: {                
+                confirmed_reward: "balance",
+                estimated_reward: "estimatedearnings",
             },
             process: function(){
                 this.data.workers_alive = 0;
