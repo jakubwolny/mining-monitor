@@ -18,7 +18,7 @@
         "default_popup": "popup.html"
     },  
     "background": {
-        "page": "background.html"
+        "scripts": ["js/btc.js", "js/background.js"]
     },
     "options_page": "options.html",
     "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
@@ -34,6 +34,7 @@
         "*://ozco.in/",
         "*://mtred.com/",
         "*://arsbitcoin.com/",
+        "*://bitminter.com/",
         "http://bitcoincharts.com/"
     ]
 }

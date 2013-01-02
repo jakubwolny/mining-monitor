@@ -97,6 +97,16 @@ a.button {
     padding-top: 5px;
     height: 35px;
 }
+
+#tokens label a {
+    color: #000;
+    text-decoration: none;
+}
+
+#tokens label a:hover{
+    text-decoration: underline;
+}
+
 #save {
     float: right;
     width: 130px;

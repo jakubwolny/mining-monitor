@@ -17,23 +17,34 @@ window.onload = function(){
     $('input.lang').val(function(){        
         return chrome.i18n.getMessage($(this).attr('id'));
     });    
-    
-    $('input[type="text"]').keyup(function(){
-        var count = 0;
-        for(var pool in pools){
-            if($('#' + pool + '_token').val() != ''){
-                count++;            
-            }
-        }
-        
-        $('#save').removeClass('saved').val(chrome.i18n.getMessage('save'));
-    });
      
     for(var p in pools){
-        $('#tokens').append('<label for="' + p + '_token" id="' + p + '_token_label" class="token">' + pools[p].title + '</label><input type="text" name="' + p + '_token" id="' + p + '_token" /><br/>');                        
+    
+        var label = $("<label/>", {
+            "class" : "token",
+            "id": p + '_token_label',
+            "for": p + '_token'            
+        });
         
+        var link = $("<a/>", {            
+            "href": pools[p].url,
+            "text": pools[p].title,
+            "target": "_blank"
+        }).appendTo(label);
+        
+        var input = $("<input/>", {
+            "type" : "text",
+            "name": p + '_token',
+            "id": p + '_token'            
+        });
+
+        $('#tokens').append(label, input);
         $('#' + p + '_token').val(options[p].token).keyup();        
-    }    
+    }
+    
+    $('input[type="text"]').keyup(function(){
+        $('#save').removeClass('saved').val(chrome.i18n.getMessage('save'));
+    });
     
     $('#convert').attr('checked', options.convert).change();
     $('input[name="badge"]').val([options.badge]);
@@ -48,7 +59,7 @@ window.onload = function(){
                 token: $('#' + pool + '_token').val()
             }
         }
-        console.log(data);
+
         window.localStorage.options = JSON.stringify(data);
         chrome.extension.getBackgroundPage().updateOptions();
         chrome.extension.getBackgroundPage().startRequest();
@@ -60,7 +71,7 @@ window.onload = function(){
     
     $('#tokens_auto').click(function(){
         for(var p in pools){
-            $('#' + p + '_token_label').removeClass('ok error').addClass('loading');
+            $('#' + p + '_token_label').removeClass('ok error').addClass('loading');            
             (function(p){
                 console.log(pools[p].url + pools[p].token_url);
                 $.ajax({                    
@@ -70,8 +81,8 @@ window.onload = function(){
                         var value = pools[p].token_getter(element); 
                         if(value){                         
                             $('#' + p + '_token_label').addClass('ok');
-                            $('#' + p + '_token').val(value);
-                        }else {
+                            $('#' + p + '_token').val(value).keyup();
+                        } else {
                             $('#' + p + '_token_label').addClass('error');
                         }
                     },
@@ -86,3 +97,13 @@ window.onload = function(){
         }
     });
 }
+
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-23642091-1']);
+_gaq.push(['_trackPageview']);
+
+(function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = 'https://ssl.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
