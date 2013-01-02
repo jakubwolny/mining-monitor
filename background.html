@@ -135,299 +135,325 @@ function updatePopup(){
     }
 }
 
-var pools = {
-    deepbit: {
-        title: "deepbit.net",
-        url: "https://deepbit.net/",
-        api: "api/",
-        account_url: "account",     
-        token_url: "settings",                  
-        token_selector: "#middle>div>b",
-        fieldsMap: {
-            payout: "payout_history"
-        },
-        process: function(){                
-            this.data.workers_alive = 0;
-            this.data.workers_all = 0;                
-            for(var i in this.data.workers) {                   
-                this.data.workers_all++;
-                if(this.data.workers[i].alive){
-                    this.data.workers_alive ++;
-                }                   
-            }              
-        }
+var pools = {};
+pools.deepbit = {
+    title: "deepbit.net",
+    url: "https://deepbit.net/",
+    api: "api/",
+    account_url: "account",     
+    token_url: "settings",                  
+    token_selector: "#middle>div>b",
+    fieldsMap: {
+        payout: "payout_history"
     },
-    slush: {
-        title: "mining.bitcoin.cz",
-        url: "http://mining.bitcoin.cz/",
-        api : "accounts/profile/json/",
-        account_url: "accounts/profile",
-        token_url: "accounts/token-manage",
-        token_selector: "#token",
-        token_getter: function(element){
-            return element.val();
-        },
-        fields: [],
-        process: function(){
-            this.data.payout = 0;
-            this.data.workers_alive = 0;
-            this.data.workers_all = 0;
-            this.data.hashrate = 0;                
-            for (var i in this.data.workers) {                    
-                this.data.workers_all++;
-                this.data.hashrate += this.data.workers[i].hashrate;
-                
-                if(this.data.workers[i].alive){
-                    this.data.workers_alive ++;
-                }                
-            }
-        }
+    process: function(){                
+        this.data.workers_alive = 0;
+        this.data.workers_all = 0;                
+        for(var i in this.data.workers) {                   
+            this.data.workers_all++;
+            if(this.data.workers[i].alive){
+                this.data.workers_alive ++;
+            }                   
+        }              
+    }
+};
+pools.slush = {
+    title: "mining.bitcoin.cz",
+    url: "http://mining.bitcoin.cz/",
+    api : "accounts/profile/json/",
+    account_url: "accounts/profile",
+    token_url: "accounts/token-manage",
+    token_selector: "#token",
+    token_getter: function(element){
+        return element.val();
     },
-    btcguild: {
-        title: "btcguild.com",
-        url: "https://www.btcguild.com/",
-        api: "api.php?api_key=",
-        account_url: "my_account.php",
-        token_url: "my_api.php",
-        token_selector: "#content .middle b",
-        fields: ["payouts"],
-        fieldsMap: {
-            confirmed_reward: "confirmed_rewards",
-            unconfirmed_reward: "unconfirmed_rewards",
-            estimated_reward: "estimated_rewards",
-            payout: "payouts"
-        },
-        preprocess: function(){
-            for(var field in this.fieldsMap){
-                this.data.user[field] = this.data.user[this.fieldsMap[field]];
-            }
-        },
-        process: function(){             
-            var result = this.data.user;
-            result.hashrate = 0;
-            result.workers_alive = 0;
-            result.workers_all = 0;
-            for (var i in this.data.workers) {                    
-                result.workers_all++;
-                result.hashrate += this.data.workers[i].hash_rate;
-                
-                // 5 minutes delay                    
-                if(this.data.workers[i].last_share != 'never' &&
-                    (new Date("1,1,1970 " + this.data.workers[i].last_share ).getTime()
-                    - new Date("1,1,1970").getTime())/1000 < 5 * 60){
-                    result.workers_alive++;
-                }                   
-            }
-            this.data = result;
-        }
-    },     
-    btcmine: {
-        title: "btcmine.com",
-        url: "https://btcmine.com/",
-        api: "api/getstats/",
-        account_url: "user/profile",
-        token_url: "user/profile",
-        token_selector: "#id_auth_token",
-        token_getter: function(element){
-            return element.val();
-        },
-        fields: ["total_bounty", "solved_blocks", "round_shares", "solved_shares", "total_payout"],
-        fieldsMap: {
-            confirmed_reward: "confirmed_bounty",
-            unconfirmed_reward: "unconfirmed_bounty",
-            estimated_reward: "estimated_bounty",
-            payout: "total_payout"
-        },
-        process: function(){
-            var xhr = new XMLHttpRequest(); 
-            var that = this;
-            this.data.workers_all = 0;
-            this.data.workers_alive = 0;
-            try {
-                xhr.onreadystatechange = function(){
-                    if (xhr.readyState != 4){
-                        return;
-                    }
+    fields: [],
+    process: function(){
+        this.data.payout = 0;
+        this.data.workers_alive = 0;
+        this.data.workers_all = 0;
+        this.data.hashrate = 0;                
+        for (var i in this.data.workers) {                    
+            this.data.workers_all++;
+            this.data.hashrate += this.data.workers[i].hashrate;
             
-                    if (xhr.status == 200 && xhr.responseText != ""){
-                        var miners = JSON.parse(xhr.responseText); 
-                        that.data.workers_all = miners.miners.length;                           
-                        for(var i = 0; i < miners.miners.length; i++){
-                            if(miners.miners[i].online_status){
-                                that.data.workers_alive++    
-                            }                                
-                        }
-                        that.data.workers_formatted = that.data.workers_alive + '/' + that.data.workers_all;    
-                        calculateSummary();
-                    }
-                }
-        
-                xhr.onerror = function(error) {
-            
-                }
-                
-                xhr.open("GET", this.url + "api/getminerstats/" + options.btcmine.token, true);
-                xhr.send(null);
-            } catch(e) {
-        
-            }
-        }
-    },
-    bitclockers: {
-        title: "bitclockers.com",
-        url: "https://bitclockers.com/",
-        api: "api/",
-        account_url: "dashboard",
-        token_url: "dashboard",
-        token_selector: "h3:eq(4) a",
-        token_getter: function(element){
-            return element.attr('href') ? element.attr('href').slice(-32) : '';
-        },
-        fieldsMap: {                
-            confirmed_reward: "balance",
-            estimated_reward: "estimatedearnings",
-        },
-        process: function(){
-            this.data.workers_alive = 0;
-            this.data.workers_all = 0;                
-            for (var i in this.data.workers) {                   
-                this.data.workers_all++;
-                if(this.data.workers[i].active){
-                    this.data.workers_alive ++;
-                }  
-            }              
-        }
-    },
-    polmine: {
-        title: "polmine.pl",
-        url: "https://polmine.pl/",
-        api: "api/",
-        account_url: "dashboard",
-        token_url: "dashboard",
-        token_selector: "h3 a",
-        token_getter: function(element){                
-            return element.attr('href') ? element.attr('href').slice(-32) : '';
-        },
-        fieldsMap: {
-            confirmed_reward: "balance"              
-        },
-        process: function(){
-            this.data.workers_all = 0;                
-            this.data.workers_alive = 0;
-            for (var i in this.data.workers) {
-                this.data.workers_all++;
-                if(parseInt(this.data.workers[i].hashrate)){
-                    this.data.workers_alive ++;
-                }
-            }               
-        }
-    },
-    simplecoin: {
-        title: "simplecoin.us",
-        url: "http://simplecoin.us/",
-        api: "api.php?api_key=",
-        account_url: "accountdetails.php",
-        token_url: "accountdetails.php",
-        token_selector: "table:eq(0) tr:eq(2) td:eq(1)",
-        fieldsMap: {
-            confirmed_reward: "confirmed_rewards",
-            estimated_reward: "estimated_rewards",                
-            payout: "payout_history"
-        },
-        token_getter: function(element){                
-            return element[1] != undefined ? element[1].textContent : '';
-        },
-        process: function(){
-            this.data.workers_alive = 0;
-            this.data.workers_all = 0;                
-            for (var i in this.data.workers) {                   
-                this.data.workers_all++;                    
-                if(this.data.workers[i].alive != 0){                        
-                    this.data.workers_alive ++;
-                }
-            }
-            this.data.unconfirmed_reward = 0;               
-        }
-    },
-    ozcoin: {
-        title: "ozco.in",
-        url: "https://ozco.in/",
-        api: "api.php?api_key=",
-        account_url: "accountdetails.php",
-        token_url: "accountdetails.php",
-        token_selector: ".accounts_table tr:eq(1) td:eq(1)",
-        fieldsMap: {
-            confirmed_reward: "confirmed_rewards",
-            estimated_reward: "estimated_rewards",                
-            payout: "payout_history"
-        },
-        token_getter: function(element){                
-            return element[0] != undefined ? element[0].textContent : '';
-        },
-        process: function(){
-            this.data.workers_alive = 0;
-            this.data.workers_all = 0;                
-            for (var i in this.data.workers) {                   
-                this.data.workers_all++;                    
-                if(this.data.workers[i].alive != 0){                        
-                    this.data.workers_alive ++;
-                }
-            }
-            this.data.unconfirmed_reward = 0;               
-        }
-    },
-    mtred: {
-        title: "mtred.com",
-        url: "https://mtred.com/",
-        api: "api/user/key/",
-        account_url: "user/profile.html",
-        token_url: "user/profile.html",
-        token_selector: "table.dataGrid tr:eq(6) td",
-        fieldsMap: {
-            confirmed_reward: "confirmed_rewards",
-            payout: "payout_history"
-        },            
-        process: function(){
-            this.data.workers_alive = 0;
-            this.data.workers_all = 0;
-            console.log(this.data.workers);
-            for (var i in this.data.workers) {
-                this.data.workers_all++;                    
-                if(this.data.workers[i].mhash > 0){                        
-                    this.data.workers_alive ++;
-                }
-            }
-            this.data.unconfirmed_reward = 0;
-            this.data.estimated_reward = 0;
-        }
-    },
-    arsbitcoin: {
-        title: "arsbitcoin.com",
-        url: "https://arsbitcoin.com/",
-        api: "api.php?api_key=",
-        account_url: "accountdetails.php",
-        token_url: "accountdetails.php",
-        token_selector: "#api_key",
-        fieldsMap: {
-            confirmed_reward: "confirmed_rewards",
-            payout: "payout_history",
-            workers_formatted: "workers"
-        },
-        process: function(){
-            this.data.workers_alive = 0;
-            this.data.workers_all = 0;
-            console.log(this.data.workers);
-            for (var i in this.data.workers) {
-                this.data.workers_all++;
-                if(this.data.workers[i].mhash > 0){
-                    this.data.workers_alive ++;
-                }
-            }
-            this.data.unconfirmed_reward = 0;
-            this.data.estimated_reward = 0;
+            if(this.data.workers[i].alive){
+                this.data.workers_alive ++;
+            }                
         }
     }
-}
+};
+pools.btcguild = {
+    title: "btcguild.com",
+    url: "https://www.btcguild.com/",
+    api: "api.php?api_key=",
+    account_url: "my_account.php",
+    token_url: "my_api.php",
+    token_selector: "#content .middle b",
+    fields: ["payouts"],
+    fieldsMap: {
+        confirmed_reward: "confirmed_rewards",
+        unconfirmed_reward: "unconfirmed_rewards",
+        estimated_reward: "estimated_rewards",
+        payout: "payouts"
+    },
+    preprocess: function(){
+        for(var field in this.fieldsMap){
+            this.data.user[field] = this.data.user[this.fieldsMap[field]];
+        }
+    },
+    process: function(){             
+        var result = this.data.user;
+        result.hashrate = 0;
+        result.workers_alive = 0;
+        result.workers_all = 0;
+        for (var i in this.data.workers) {                    
+            result.workers_all++;
+            result.hashrate += this.data.workers[i].hash_rate;
+            
+            // 5 minutes delay                    
+            if(this.data.workers[i].last_share != 'never' &&
+                (new Date("1,1,1970 " + this.data.workers[i].last_share ).getTime()
+                - new Date("1,1,1970").getTime())/1000 < 5 * 60){
+                result.workers_alive++;
+            }                   
+        }
+        this.data = result;
+    }
+};
+pools.btcmine = {
+    title: "btcmine.com",
+    url: "https://btcmine.com/",
+    api: "api/getstats/",
+    account_url: "user/profile",
+    token_url: "user/profile",
+    token_selector: "#id_auth_token",
+    token_getter: function(element){
+        return element.val();
+    },
+    fields: ["total_bounty", "solved_blocks", "round_shares", "solved_shares", "total_payout"],
+    fieldsMap: {
+        confirmed_reward: "confirmed_bounty",
+        unconfirmed_reward: "unconfirmed_bounty",
+        estimated_reward: "estimated_bounty",
+        payout: "total_payout"
+    },
+    process: function(){
+        var xhr = new XMLHttpRequest(); 
+        var that = this;
+        this.data.workers_all = 0;
+        this.data.workers_alive = 0;
+        try {
+            xhr.onreadystatechange = function(){
+                if (xhr.readyState != 4){
+                    return;
+                }
+        
+                if (xhr.status == 200 && xhr.responseText != ""){
+                    var miners = JSON.parse(xhr.responseText); 
+                    that.data.workers_all = miners.miners.length;                           
+                    for(var i = 0; i < miners.miners.length; i++){
+                        if(miners.miners[i].online_status){
+                            that.data.workers_alive++    
+                        }                                
+                    }
+                    that.data.workers_formatted = that.data.workers_alive + '/' + that.data.workers_all;    
+                    calculateSummary();
+                }
+            }
+    
+            xhr.onerror = function(error) {
+        
+            }
+            
+            xhr.open("GET", this.url + "api/getminerstats/" + options.btcmine.token, true);
+            xhr.send(null);
+        } catch(e) {
+    
+        }
+    }
+};
+pools.bitclockers = {
+    title: "bitclockers.com",
+    url: "https://bitclockers.com/",
+    api: "api/",
+    account_url: "dashboard",
+    token_url: "dashboard",
+    token_selector: "h3:eq(4) a",
+    token_getter: function(element){
+        return element.attr('href') ? element.attr('href').slice(-32) : '';
+    },
+    fieldsMap: {                
+        confirmed_reward: "balance",
+        estimated_reward: "estimatedearnings",
+    },
+    process: function(){
+        this.data.workers_alive = 0;
+        this.data.workers_all = 0;                
+        for (var i in this.data.workers) {                   
+            this.data.workers_all++;
+            if(this.data.workers[i].active){
+                this.data.workers_alive ++;
+            }  
+        }              
+    }
+};
+pools.polmine = {
+    title: "polmine.pl",
+    url: "https://polmine.pl/",
+    api: "api/",
+    account_url: "dashboard",
+    token_url: "dashboard",
+    token_selector: "h3 a",
+    token_getter: function(element){                
+        return element.attr('href') ? element.attr('href').slice(-32) : '';
+    },
+    fieldsMap: {
+        confirmed_reward: "balance"              
+    },
+    process: function(){
+        this.data.workers_all = 0;                
+        this.data.workers_alive = 0;
+        for (var i in this.data.workers) {
+            this.data.workers_all++;
+            if(parseInt(this.data.workers[i].hashrate)){
+                this.data.workers_alive ++;
+            }
+        }               
+    }
+};
+pools.simplecoin = {
+    title: "simplecoin.us",
+    url: "http://simplecoin.us/",
+    api: "api.php?api_key=",
+    account_url: "accountdetails.php",
+    token_url: "accountdetails.php",
+    token_selector: "table:eq(0) tr:eq(2) td:eq(1)",
+    fieldsMap: {
+        confirmed_reward: "confirmed_rewards",
+        estimated_reward: "estimated_rewards",                
+        payout: "payout_history"
+    },
+    token_getter: function(element){                
+        return element[1] != undefined ? element[1].textContent : '';
+    },
+    process: function(){
+        this.data.workers_alive = 0;
+        this.data.workers_all = 0;                
+        for (var i in this.data.workers) {                   
+            this.data.workers_all++;                    
+            if(this.data.workers[i].alive != 0){                        
+                this.data.workers_alive ++;
+            }
+        }
+        this.data.unconfirmed_reward = 0;               
+    }
+};
+pools.ozcoin = {
+    title: "ozco.in",
+    url: "https://ozco.in/",
+    api: "api.php?api_key=",
+    account_url: "accountdetails.php",
+    token_url: "accountdetails.php",
+    token_selector: ".accounts_table tr:eq(1) td:eq(1)",
+    fieldsMap: {
+        confirmed_reward: "confirmed_rewards",
+        estimated_reward: "estimated_rewards",                
+        payout: "payout_history"
+    },
+    token_getter: function(element){                
+        return element[0] != undefined ? element[0].textContent : '';
+    },
+    process: function(){
+        this.data.workers_alive = 0;
+        this.data.workers_all = 0;                
+        for (var i in this.data.workers) {                   
+            this.data.workers_all++;                    
+            if(this.data.workers[i].alive != 0){                        
+                this.data.workers_alive ++;
+            }
+        }
+        this.data.unconfirmed_reward = 0;               
+    }
+};
+pools.mtred = {
+    title: "mtred.com",
+    url: "https://mtred.com/",
+    api: "api/user/key/",
+    account_url: "user/profile.html",
+    token_url: "user/profile.html",
+    token_selector: "table.dataGrid tr:eq(6) td",
+    fieldsMap: {
+        confirmed_reward: "confirmed_rewards",
+        payout: "payout_history"
+    },            
+    process: function(){
+        this.data.workers_alive = 0;
+        this.data.workers_all = 0;
+        console.log(this.data.workers);
+        for (var i in this.data.workers) {
+            this.data.workers_all++;                    
+            if(this.data.workers[i].mhash > 0){                        
+                this.data.workers_alive ++;
+            }
+        }
+        this.data.unconfirmed_reward = 0;
+        this.data.estimated_reward = 0;
+    }
+};
+pools.arsbitcoin = {
+    title: "arsbitcoin.com",
+    url: "https://arsbitcoin.com/",
+    api: "api.php?api_key=",
+    account_url: "accountdetails.php",
+    token_url: "accountdetails.php",
+    token_selector: "#api_key",
+    fieldsMap: {
+        confirmed_reward: "confirmed_rewards",
+        payout: "payout_history",
+        workers_formatted: "workers"
+    },
+    process: function(){
+        this.data.workers_alive = 0;
+        this.data.workers_all = 0;
+        console.log(this.data.workers);
+        for (var i in this.data.workers) {
+            this.data.workers_all++;
+            if(this.data.workers[i].mhash > 0){
+                this.data.workers_alive ++;
+            }
+        }
+        this.data.unconfirmed_reward = 0;
+        this.data.estimated_reward = 0;
+    }
+};
+pools.bitminter = {
+    title: "bitminter.com",
+    url: "https://bitminter.com/",
+    api: "api/users?key=",
+    account_url: "members/",
+    token_url: "members/apikeys",
+    token_selector: "#apikeylist tr td:eq(3)",
+    fieldsMap: {
+        confirmed_reward: "confirmed_rewards",
+        hashrate: "hash_rate",
+        payout: "payout_history"
+    },
+    process: function(){
+        this.data.workers_alive = 0;
+        this.data.workers_all = this.data.workers.length;
+        
+        for (var i = 0; i < this.data.workers.length; i++) {
+            if(this.data.workers[i].alive){
+                this.data.workers_alive++;
+            }
+        }
+        this.data.unconfirmed_reward = 0;
+        this.data.estimated_reward = 0;
+        this.data.confirmed_reward = this.data.balances.BTC;
+    }
+};
+
 
 // little inheritance
 for(var p in pools){
