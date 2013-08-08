@@ -21,7 +21,7 @@ window.onload = function(){
     for(var p in pools){
     
         var label = $("<label/>", {
-            "class" : "token",
+            "class": "token",
             "id": p + '_token_label',
             "for": p + '_token'            
         });
@@ -33,7 +33,7 @@ window.onload = function(){
         }).appendTo(label);
         
         var input = $("<input/>", {
-            "type" : "text",
+            "type": "text",
             "name": p + '_token',
             "id": p + '_token'            
         });
@@ -73,7 +73,7 @@ window.onload = function(){
         for(var p in pools){
             $('#' + p + '_token_label').removeClass('ok error').addClass('loading');            
             (function(p){
-                $.ajax({                    
+                $.ajax({
                     url: pools[p].url + pools[p].token_url,
                     success: function(data){
                         var element = $(data).find(pools[p].token_selector);

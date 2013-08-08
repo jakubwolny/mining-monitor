@@ -73,7 +73,6 @@ function calculateSummary(){
     summary = Object.create(empty);
     for(var p in pools){
         if(options[p].token && pools[p].data != undefined){
-            console.log(pools[p].data);
             summary.workers_all += pools[p].data.workers_all;
             summary.workers_alive += pools[p].data.workers_alive;
             summary.workers_formatted = summary.workers_alive + '/' + summary.workers_all;
@@ -82,8 +81,7 @@ function calculateSummary(){
                 summary[i] = summary[i].add(pools[p].data[i]);                
             }, this);
         }
-    }
-    
+    }    
       
     var text = '';            
     if(options.badge == 'hashrate'){
@@ -96,15 +94,15 @@ function calculateSummary(){
                 
         if(summary.hashrate >= 1000000){
             text = (summary.hashrate / 1000000).toString().slice(0, 3).replace(/\.$/, '') + 'M';
-        }else if(summary.hashrate >= 10000){
+        } else if(summary.hashrate >= 10000){
             text = parseInt(summary.hashrate / 1000).toString() + 'K';
         } else {
             text = summary.hashrate.toString().slice(0, 4).replace(/\.$/, '');
         }                    
-    }else if(options.badge == 'confirmed_reward'){
+    } else if(options.badge == 'confirmed_reward'){
         // remove dot from the end - this format supports up to 9999 BTC                    
         text = summary[options.badge].toString().slice(0, 4).replace(/\.$/, '');
-    }else {
+    } else {
         text = summary[options.badge].toString().slice(0, 4);
     }              
             
@@ -158,7 +156,7 @@ pools.deepbit = {
 pools.slush = {
     title: "mining.bitcoin.cz",
     url: "http://mining.bitcoin.cz/",
-    api : "accounts/profile/json/",
+    api: "accounts/profile/json/",
     account_url: "accounts/profile",
     token_url: "accounts/token-manage",
     token_selector: "#token",
@@ -211,8 +209,8 @@ pools.btcguild = {
             
             // 5 minutes delay                    
             if(this.data.workers[i].last_share != 'never' &&
-                (new Date("1,1,1970 " + this.data.workers[i].last_share ).getTime()
-                - new Date("1,1,1970").getTime())/1000 < 5 * 60){
+                (new Date("1,1,1970 " + this.data.workers[i].last_share).getTime()
+                - new Date("1,1,1970").getTime()) / 1000 < 5 * 60){
                 result.workers_alive++;
             }                   
         }
@@ -388,7 +386,6 @@ pools.mtred = {
     process: function(){
         this.data.workers_alive = 0;
         this.data.workers_all = 0;
-        console.log(this.data.workers);
         for (var i in this.data.workers) {
             this.data.workers_all++;                    
             if(this.data.workers[i].mhash > 0){                        
@@ -414,7 +411,6 @@ pools.arsbitcoin = {
     process: function(){
         this.data.workers_alive = 0;
         this.data.workers_all = 0;
-        console.log(this.data.workers);
         for (var i in this.data.workers) {
             this.data.workers_all++;
             if(this.data.workers[i].mhash > 0){
@@ -453,6 +449,32 @@ pools.bitminter = {
     }
 };
 
+pools['50btc'] = {
+    title: "50btc.com",
+    url: "https://50btc.com/",
+    api: "en/api/",
+    account_url: "account/",
+    token_url: "en/account/api",
+    token_selector: ".i-input",
+    token_getter: function(element){
+        return element.val();
+    },
+    fieldsMap: {
+        confirmed_reward: "confirmed_rewards",
+        hashrate: "hash_rate",
+        payout: "payouts",
+        workers_alive: "active_workers"
+    },
+    preprocess: function(){
+        var workers_all = Object.keys(this.data.workers).length;
+        this.data = this.data.user;
+        this.data.workers_all = workers_all;
+        
+        for(var field in this.fieldsMap){
+            this.data[field] = this.data[this.fieldsMap[field]];
+        }
+    }
+};
 
 // little inheritance
 for(var p in pools){
@@ -514,7 +536,6 @@ function startRequest() {
     
     for(var pool in pools){
         if(options[pool].token){
-            console.log(pool);
             getData(pool,
             function(count) {            
                 scheduleRequest();
@@ -522,7 +543,7 @@ function startRequest() {
             function() {            
                 scheduleRequest();
             });
-        }else {
+        } else {
             delete data[pool];
         }
     }
@@ -548,7 +569,6 @@ function getData(pool, onSuccess, onError) {
         chrome.browserAction.setBadgeText({
             text: "!"
         });
-        console.log(pool);
         pools[pool].postprocess();  
 
         data[pool] = {
@@ -571,7 +591,6 @@ function getData(pool, onSuccess, onError) {
         pools[pool].data = result;
         pools[pool].preprocess();
         pools[pool].process();
-        console.log(pool);
         pools[pool].postprocess();            
         data[pool] = pools[pool].data;
         
