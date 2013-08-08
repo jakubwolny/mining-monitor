@@ -73,7 +73,6 @@ window.onload = function(){
         for(var p in pools){
             $('#' + p + '_token_label').removeClass('ok error').addClass('loading');            
             (function(p){
-                console.log(pools[p].url + pools[p].token_url);
                 $.ajax({                    
                     url: pools[p].url + pools[p].token_url,
                     success: function(data){
